@@ -1,0 +1,15 @@
+# Exclude doxygen
+miosix/_doc/doxygen/html/*
+
+# Exclude temporary files
+main.elf
+main.bin
+main.hex
+main.map
+*.o
+*.a
+*.d
+
+# Exclude Mac OS X temporary
+._*
+.DS_Store
