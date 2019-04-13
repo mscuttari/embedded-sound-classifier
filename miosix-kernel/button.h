@@ -2,7 +2,6 @@
 #define BUTTON_H
 
 namespace UserButton {
-    void init();
     void wait();
 }
 

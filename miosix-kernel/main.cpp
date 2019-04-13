@@ -13,7 +13,6 @@ void sendStopSignal(STM32Serial &serial);
 
 int main() {
     STM32Serial serial(2, BAUD_RATE);
-    UserButton::init();
     
     UserButton::wait();
     sendStartSignal(serial);
