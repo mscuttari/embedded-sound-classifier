@@ -18,7 +18,7 @@ else:
 # Connect to the board
 try:
 	ser = serial.Serial(port = portName,
-						baudrate = 9600,
+						baudrate = 115200,
 						stopbits = serial.STOPBITS_ONE,
 						parity = serial.PARITY_NONE,
 						bytesize = serial.EIGHTBITS,
@@ -42,17 +42,24 @@ message = ""
 
 while (message != "#start"):
 	message = ser.readline().decode()
+	message = message.split("\n")[0]
 
 # Start logging
 print("Listening...")
 
+somethingPrinted = False
 message = ser.readline().decode()
 
 while (message != "#stop"):
 	print(message, end = '')
+	somethingPrinted |= len(message) > 0;
 	message = ser.readline().decode()
+	message = message.split("\n")[0]
 
-print("\nStopped")
+if (somethingPrinted):
+	print("\nStopped")
+else:
+	print("Stopped")
 
 # Close the serial connection
 ser.close()

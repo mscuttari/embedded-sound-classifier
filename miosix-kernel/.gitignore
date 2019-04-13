@@ -13,3 +13,11 @@ main.map
 # Exclude Mac OS X temporary
 ._*
 .DS_Store
+
+# NetBeans
+**/nbproject/private/tools/*
+build/
+nbbuild/
+dist/
+nbdist/
+.nb-gradle/
