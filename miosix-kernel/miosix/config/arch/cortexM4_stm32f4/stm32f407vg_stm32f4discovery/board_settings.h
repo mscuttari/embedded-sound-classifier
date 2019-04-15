@@ -71,9 +71,9 @@ const bool defaultSerialFlowctrl=false;
 //#define AUX_SERIAL "auxtty"
 const unsigned int auxSerialSpeed=9600;
 const bool auxSerialFlowctrl=false;
-//#define SERIAL_1_DMA //Serial 1 is not used, so not enabling DMA
-//#define SERIAL_2_DMA //Serial 2 DMA conflicts with I2S driver in the examples
-#define SERIAL_3_DMA
+#define SERIAL_1_DMA //Serial 1 is not used, so not enabling DMA
+#define SERIAL_2_DMA //Serial 2 DMA conflicts with I2S driver in the examples
+//#define SERIAL_3_DMA
 
 //#define I2C_WITH_DMA
 
