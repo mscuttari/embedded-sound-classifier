@@ -6,14 +6,18 @@ using namespace miosix;
 
 typedef Gpio<GPIOA_BASE, 0> button;
 
-bool initialized = false;
-Thread *t;
-bool justPushed = false;
+static bool justPushed = false;
+static Thread *t;
+
+UserButton& UserButton::getInstance() {
+    static UserButton instance;
+    return instance;
+}
 
 /**
  * Setup the button by setting its pin as input and by enabling the interrupt
  */
-void init() {
+UserButton::UserButton() {
     // Temporarily disble the interrupts in order to safely
     // configure the GPIO interface
     FastInterruptDisableLock dLock;
@@ -70,11 +74,6 @@ void __attribute__((naked)) EXTI0_IRQHandler() {
  * The calling thread is paused.
  */
 void UserButton::wait() {
-    if (!initialized) {
-        init();
-        initialized = true;
-    }
-    
     // Disable interrupts
     FastInterruptDisableLock dLock;
     
