@@ -28,7 +28,7 @@ public:
     /**
      * Start the recording
      */
-    void start(function<void (unsigned char*, int)> callback);
+    void start(function<void (short*, unsigned int)> callback);
     
     /**
      * Stop the recording
@@ -47,7 +47,7 @@ private:
     static void* mainLoopLauncher(void* arg);
     void mainLoop();
     
-    function<void (unsigned char*, int)> callback;
+    function<void (short*, unsigned int)> callback;
     static void* callbackLauncher(void* arg);
     void execCallback();
     

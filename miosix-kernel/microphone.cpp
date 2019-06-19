@@ -34,20 +34,20 @@ static void IRQdmaRefill() {
     unsigned short *buffer;
     
     if (bq->tryGetWritableBuffer(buffer) == false) {
-        enobuf=true;
+        enobuf = true;
         return;
     }
     
-    DMA1_Stream3->CR=0;
-    DMA1_Stream3->PAR=reinterpret_cast<unsigned int>(&SPI2->DR);
-    DMA1_Stream3->M0AR=reinterpret_cast<unsigned int>(buffer);
-    DMA1_Stream3->NDTR=bufferSize;
-    DMA1_Stream3->CR=DMA_SxCR_PL_1    | //High priority DMA stream
-                     DMA_SxCR_MSIZE_0 | //Write 16bit at a time to RAM
-                     DMA_SxCR_PSIZE_0 | //Read 16bit at a time from SPI
-                     DMA_SxCR_MINC    | //Increment RAM pointer
-                     DMA_SxCR_TCIE    | //Interrupt on completion
-                     DMA_SxCR_EN;       //Start the DMA
+    DMA1_Stream3->CR = 0;
+    DMA1_Stream3->PAR = reinterpret_cast<unsigned int>(&SPI2->DR);
+    DMA1_Stream3->M0AR = reinterpret_cast<unsigned int>(buffer);
+    DMA1_Stream3->NDTR = bufferSize;
+    DMA1_Stream3->CR = DMA_SxCR_PL_1    |   // High priority DMA stream
+                       DMA_SxCR_MSIZE_0 |   // Write 16bit at a time to RAM
+                       DMA_SxCR_PSIZE_0 |   // Read 16bit at a time from SPI
+                       DMA_SxCR_MINC    |   // Increment RAM pointer
+                       DMA_SxCR_TCIE    |   // Interrupt on completion
+                       DMA_SxCR_EN;         // Start the DMA
 }
 
 
@@ -207,17 +207,17 @@ void Microphone::stop() {
 }
 
 
-void* Microphone::mainLoopLauncher(void* arg){
+void* Microphone::mainLoopLauncher(void* arg) {
     reinterpret_cast<Microphone*>(arg)->mainLoop();
     return 0;
 }
 
 
-void Microphone::mainLoop(){
+void Microphone::mainLoop() {
     waiting = Thread::getCurrentThread();
     pthread_t cback;
-    bq = new BufferQueue<unsigned short,bufferSize, bufNum>();
-    NVIC_EnableIRQ(DMA1_Stream3_IRQn);  
+    bq = new BufferQueue<unsigned short, bufferSize, bufNum>();
+    NVIC_EnableIRQ(DMA1_Stream3_IRQn);
     
     // Create the thread that will execute the callbacks 
     pthread_create(&cback, NULL, callbackLauncher, reinterpret_cast<void*>(this));
@@ -228,7 +228,7 @@ void Microphone::mainLoop(){
 
     while (recording) {
         PCMindex = 0;      
-        // process any new chunk of PDM samples
+        // Process any new chunk of PDM samples
         for (;;){
             if (enobuf) {
                 enobuf = false;
@@ -269,7 +269,7 @@ void Microphone::mainLoop(){
 }
 
 
-void* Microphone::callbackLauncher(void* arg){
+void* Microphone::callbackLauncher(void* arg) {
     reinterpret_cast<Microphone*>(arg)->execCallback();
     return 0;
 }
@@ -279,7 +279,7 @@ void Microphone::execCallback() {
     while (recording) {
         pthread_mutex_lock(&bufMutex);
         
-        while(recording && !isBufferReady)
+        while (recording && !isBufferReady)
             pthread_cond_wait(&cbackExecCond, &bufMutex);
         
         callback(compressedBuf, compressed_buf_size_bytes);
@@ -293,8 +293,7 @@ bool Microphone::processPDM(const unsigned short *pdmbuffer, int size) {
     int decimatedIndex;
     int remaining = PCMsize - PCMindex;
     int length = remaining < size ? remaining : size; 
-    short int s, sHigh, valueBeforeJump, jumpValue;
-    bool jumpMade = false;
+    short int s;
 
     for (int i=0; i < length; i++){    
         // Convert couples 16 pdm one-bit samples in one signed 16-bit PCM sample
@@ -302,7 +301,7 @@ bool Microphone::processPDM(const unsigned short *pdmbuffer, int size) {
         processingBuffer[PCMindex] = s;
         decimatedIndex = PCMindex / DECIMATION_FACTOR;
         
-        if(PCMindex - (decimatedIndex * DECIMATION_FACTOR) == 0) {
+        if (PCMindex - (decimatedIndex * DECIMATION_FACTOR) == 0) {
             decimatedProcessingBuffer[decimatedIndex] = s;
         }
         
@@ -337,7 +336,7 @@ unsigned short Microphone::PDMFilter(const unsigned short* PDMBuffer, unsigned i
     combInput = intReg[filterOrder-1];
     
     // Apply the comb filter (with delay 1):
-    for (short i=0; i < filterOrder; i++){
+    for (short i = 0; i < filterOrder; i++){
         combRes = combInput - combReg[i];
         combReg[i] = combInput;
         combInput = combRes;

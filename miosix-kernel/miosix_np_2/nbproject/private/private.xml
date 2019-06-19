@@ -11,11 +11,12 @@
     <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="0"/>
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
         <group>
+            <file>file:/D:/Programmazione/Progetti/AOS/miosix-kernel/codec.h</file>
             <file>file:/D:/Programmazione/Progetti/AOS/miosix-kernel/microphone.cpp</file>
-            <file>file:/D:/Programmazione/Progetti/AOS/miosix-kernel/miosix/arch/common/drivers/serial_stm32.cpp</file>
-            <file>file:/D:/Programmazione/Progetti/AOS/miosix-kernel/Makefile</file>
+            <file>file:/D:/Programmazione/Progetti/AOS/miosix-kernel/button.h</file>
+            <file>file:/D:/Programmazione/Progetti/AOS/miosix-kernel/microphone.h</file>
             <file>file:/D:/Programmazione/Progetti/AOS/miosix-kernel/main.cpp</file>
-            <file>file:/D:/Programmazione/Progetti/AOS/miosix-kernel/miosix/config/arch/cortexM4_stm32f4/stm32f407vg_stm32f4discovery/board_settings.h</file>
+            <file>file:/D:/Programmazione/Progetti/AOS/miosix-kernel/button.cpp</file>
         </group>
     </open-files>
     <preferences xmlns="http://www.netbeans.org/ns/auxiliary-configuration-preferences/1">
