@@ -1,7 +1,7 @@
 #include "microphone.h"
 #include <miosix.h>
 #include <functional>
-#include "miosix/kernel/scheduler/scheduler.h"
+#include <kernel/scheduler/scheduler.h>
 
 // Keep only 1 / DECIMATION_FACTOR of audio samples
 #define DECIMATION_FACTOR 4
@@ -127,7 +127,7 @@ Microphone::Microphone() {
 }
 
 
-void Microphone::start(function<void (unsigned char*, int)> callback) {
+void Microphone::start(function<void (short*, unsigned int)> callback) {
     this->callback = callback;
     recording = true;
     readyBuffer = (short*) malloc(sizeof(short) * PCMsize);
@@ -282,7 +282,7 @@ void Microphone::execCallback() {
         while (recording && !isBufferReady)
             pthread_cond_wait(&cbackExecCond, &bufMutex);
         
-        callback(compressedBuf, compressed_buf_size_bytes);
+        callback((short*)compressedBuf, compressed_buf_size_bytes);
         isBufferReady = false;
         pthread_mutex_unlock(&bufMutex);
     }

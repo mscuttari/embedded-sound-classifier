@@ -23,5 +23,5 @@ nbdist/
 .nb-gradle/
 
 # CLion
-CMakeLists.txt
-cmake-debug-build/*
+cmake-build-*
+.idea/

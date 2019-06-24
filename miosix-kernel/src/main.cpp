@@ -3,7 +3,7 @@
 #include <functional>
 #include "button.h"
 #include "microphone.h"
-#include "miosix/arch/common/drivers/serial_stm32.h"
+#include <arch/common/drivers/serial_stm32.h>
 
 #define BAUD_RATE 115200
 
