@@ -16,8 +16,11 @@ SUBDIRS := $(KPATH)
 ##
 ## List here your source files (both .s, .c and .cpp)
 ##
-SRC :=                                  \
-main.cpp button.cpp microphone.cpp codec.cpp
+SRC :=                  \
+src/main.cpp		\
+src/button.cpp		\
+src/microphone.cpp	\
+src/codec.cpp
 
 ##
 ## List here additional static libraries with relative path
