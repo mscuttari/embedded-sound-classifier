@@ -16,6 +16,12 @@ set(LIBS "")
 ## List here additional include directories (in the form -Iinclude_dir)
 set(INCLUDE_DIRS "")
 
+##
+## List here your source files (both .s, .c and .cpp)
+##
+file(GLOB SOURCES src/*.c src/*.cpp)
+
+
 
 ##############################################################################
 ## You should not need to modify anything below                             ##
@@ -30,14 +36,30 @@ set(CMAKE_SYSTEM_VERSION 1)
 set(CMAKE_VERBOSE_MAKEFILE ON)
 
 file(GLOB TOOLCHAIN_PATH ${TOOLCHAIN_PATH})
+if (TOOLCHAIN_PATH STREQUAL "")
+    message(FATAL_ERROR "Toolchain not found")
+endif()
+
 set(KPATH_REL ${KPATH})
+
 file(GLOB KPATH ${KPATH})
+
+if (KPATH STREQUAL "")
+    message(FATAL_ERROR "Kernel not found")
+endif()
+
 file(GLOB CONFPATH ${KPATH}/config)
+
+if (CONFPATH EQUAL "")
+    message(FATAL_ERROR "Kernel configuration folder not found")
+endif()
+
+if ("${SOURCES}" STREQUAL "")
+    message(FATAL_ERROR "No sources specified")
+endif()
 
 add_subdirectory(${KPATH})
 include(${CONFPATH}/CMakeLists.txt)
-
-file(GLOB_RECURSE SOURCES "src/*.c" "src/*.cpp")
 
 include_directories(
         ${TOOLCHAIN_PATH}/arm-miosix-eabi/include
