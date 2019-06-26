@@ -1,11 +1,6 @@
 #ifndef MICROPHONE_H
 #define MICROPHONE_H
 
-// IDE bug ("function" type not recognised)
-#ifndef __GXX_EXPERIMENTAL_CXX0X__
-#define __GXX_EXPERIMENTAL_CXX0X__
-#endif
-
 #include <miosix.h>
 #include <functional>
 #include "codec.h"

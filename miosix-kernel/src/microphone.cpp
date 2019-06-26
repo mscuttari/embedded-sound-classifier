@@ -33,7 +33,7 @@ static signed char pdmLUT[] = {-1, 1};
 static void IRQdmaRefill() {
     unsigned short *buffer;
     
-    if (bq->tryGetWritableBuffer(buffer) == false) {
+    if (!bq->tryGetWritableBuffer(buffer)) {
         enobuf = true;
         return;
     }
@@ -68,7 +68,7 @@ static const unsigned short *getReadableBuffer() {
     const unsigned short *result;
     unsigned int size;
     
-    while (bq->tryGetReadableBuffer(result, size) == false) {
+    while (!bq->tryGetReadableBuffer(result, size)) {
         waiting->IRQwait();
         
         {
@@ -155,8 +155,7 @@ void Microphone::start(function<void (short*, unsigned int)> callback) {
         dout::mode(Mode::ALTERNATE);
         dout::alternateFunction(5);
         dout::speed(Speed::_50MHz);
-        
-        
+
         // I2S PLL Clock Frequency: 135.5 Mhz
         RCC->PLLI2SCFGR=(2<<28) | (271<<6);
         
@@ -179,7 +178,7 @@ void Microphone::start(function<void (short*, unsigned int)> callback) {
     // Wait for the microphone to enable
     delayMs(10);
     
-    pthread_create(&mainLoopThread, NULL, mainLoopLauncher, reinterpret_cast<void*>(this));
+    pthread_create(&mainLoopThread, nullptr, mainLoopLauncher, reinterpret_cast<void*>(this));
 }
 
 
@@ -188,7 +187,7 @@ void Microphone::stop() {
     recording = false;
     
     // Wait for the last PCM processing to end
-    pthread_join(mainLoopThread, NULL);
+    pthread_join(mainLoopThread, nullptr);
     
     // Reset the configuration registers to stop the hardware
     NVIC_DisableIRQ(DMA1_Stream3_IRQn);
@@ -209,7 +208,7 @@ void Microphone::stop() {
 
 void* Microphone::mainLoopLauncher(void* arg) {
     reinterpret_cast<Microphone*>(arg)->mainLoop();
-    return 0;
+    return nullptr;
 }
 
 
@@ -220,7 +219,7 @@ void Microphone::mainLoop() {
     NVIC_EnableIRQ(DMA1_Stream3_IRQn);
     
     // Create the thread that will execute the callbacks 
-    pthread_create(&cback, NULL, callbackLauncher, reinterpret_cast<void*>(this));
+    pthread_create(&cback, nullptr, callbackLauncher, reinterpret_cast<void*>(this));
     isBufferReady = false;
     
     // Variable used for swap of processing and ready buffer
@@ -235,7 +234,7 @@ void Microphone::mainLoop() {
                 dmaRefill();
             }
             
-            if (processPDM(getReadableBuffer(), bufferSize) == true){
+            if (processPDM(getReadableBuffer(), bufferSize)){
                 // Transcode until the specified number of PCM samples
                 break;
             }
@@ -265,13 +264,13 @@ void Microphone::mainLoop() {
     }
     
     pthread_cond_broadcast(&cbackExecCond);
-    pthread_join(cback, NULL);
+    pthread_join(cback, nullptr);
 }
 
 
 void* Microphone::callbackLauncher(void* arg) {
     reinterpret_cast<Microphone*>(arg)->execCallback();
-    return 0;
+    return nullptr;
 }
 
 
@@ -307,11 +306,11 @@ bool Microphone::processPDM(const unsigned short *pdmbuffer, int size) {
         
         PCMindex++;
     }
-    
-    if (PCMindex < PCMsize) // If produced PCM sample are not enough 
+
+    if (PCMindex < PCMsize) // If produced PCM sample are not enough
         return false;
-    
-    return true;    
+
+    return true;
 }
 
 
