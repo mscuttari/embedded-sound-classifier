@@ -1,9 +1,9 @@
 #include <cstdio>
 #include <miosix.h>
 #include <functional>
+#include <arch/common/drivers/serial.h>
 #include "button.h"
 #include "microphone.h"
-#include <arch/common/drivers/serial_stm32.h>
 
 #define BAUD_RATE 115200
 
@@ -16,18 +16,21 @@ void scanAudio(short* data, unsigned int size);
 
 
 int main() {
+    // Peripherals setup
     STM32Serial serial(2, BAUD_RATE);
-    UserButton& button = UserButton::getInstance();
     Microphone& microphone = Microphone::getInstance();
-    
-    button.wait();
+
+    // Start the recording on user button press
+    UserButton::wait();
     sendStartSignal(serial);
     microphone.start(bind(scanAudio, placeholders::_1, placeholders::_2));
-    
-    button.wait();
+
+    // Stop on second button press
+    UserButton::wait();
     microphone.stop();
     sendStopSignal(serial);
-    
+
+    // Endless loop
     while (true) {
         
     }
