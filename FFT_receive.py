@@ -5,7 +5,7 @@
 # Usage: FFT_receive.py filename
 # Example: ./FFT_receive.py fft.csv
 
-import sys, serial
+import sys, serial, os
 from subprocess import call
 
 # bytes representing the expected size of the audio data chunk
@@ -70,7 +70,7 @@ while nextBatchSizeInt != 0:
 	nextBatchSize = ser.read(4)
 	nextBatchSizeInt = int.from_bytes(nextBatchSize, byteorder='little', signed=True)
 	
-	print("Batch size: " + str(nextBatchSizeInt))
+	print("Batch size: " + str(nextBatchSizeInt) + ".")
 	
 	# Check if an error occured
 	if nextBatchSizeInt != expectedBatchSizeInt and nextBatchSizeInt != 0 :
@@ -92,5 +92,3 @@ if dataExtraction == 0:
 	print("FFT extraction completed")
 else:
 	print("Error in FFT extraction")
-
-call(["rm", "fft.raw"])
