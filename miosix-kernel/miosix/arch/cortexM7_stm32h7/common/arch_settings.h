@@ -28,6 +28,9 @@
 #ifndef ARCH_SETTINGS_H
 #define	ARCH_SETTINGS_H
 
+#define ARM_MATH_CM7
+
+#ifdef __cplusplus
 namespace miosix {
 
 /**
@@ -60,5 +63,6 @@ const unsigned int CTXSAVE_STACK_ALIGNMENT=8;
  */
 
 } //namespace miosix
+#endif
 
 #endif	/* ARCH_SETTINGS_H */

@@ -27,8 +27,8 @@
    ----------------------------------------------------------------------
 @endverbatim
  */
-#ifndef TM_FFT_H
-#define TM_FFT_H 100
+#ifndef FFT_H
+#define FFT_H
 
 /* C++ detection */
 #ifdef __cplusplus
@@ -36,12 +36,12 @@ extern "C" {
 #endif
 
 /**
- * @addtogroup TM_STM32F4xx_Libraries
+ * @addtogroup STM32F4xx_Libraries
  * @{
  */
 
 /**
- * @defgroup TM_FFT
+ * @defgroup FFT
  * @brief    FFT library for STM32F4xx devices - http://stm32f4-discovery.com/2015/05/library-62-fast-fourier-transform-fft-for-stm32f4xx
  * @{
  *
@@ -66,16 +66,13 @@ extern "C" {
 @endverbatim
  */
 
-#define __FPU_PRESENT   1
-#define STM32F407xx
-#define ARM_MATH_CM4
-
-#include <arch/common/CMSIS/Device/ST/STM32F4xx/Include/stm32f4xx.h>
-#include <arch/common/CMSIS/Include/arm_math.h>
-#include <arch/common/CMSIS/Include/arm_const_structs.h>
+#include <arch_settings.h>
+#include <interfaces/arch_registers.h>
+#include <CMSIS/Include/arm_math.h>
+#include <CMSIS/Include/arm_const_structs.h>
 
 /**
- * @defgroup TM_FFT_Macros
+ * @defgroup FFT_Macros
  * @brief    Library defines
  * @{
  */
@@ -95,7 +92,7 @@ extern "C" {
  */
  
 /**
- * @defgroup TM_FFT_Typedefs
+ * @defgroup FFT_Typedefs
  * @brief    Library Typedefs
  * @{
  */
@@ -108,25 +105,25 @@ typedef struct {
 	float32_t* Output;              /*!< Pointer to data output buffer. Its length must be FFT_Size */
 	uint16_t FFT_Size;              /*!< FFT size in units of samples. This parameter can be a value of 2^n where n is between 4 and 12 */
 	uint8_t UseMalloc;              /*!< Set to 1 when malloc is used for memory allocation for buffers. Meant for private use */
-	uint16_t Count;                 /*!< Number of samples in buffer when using @ref TM_FFT_AddToBuffer function. Meant for private use */
+	uint16_t Count;                 /*!< Number of samples in buffer when using @ref FFT_AddToBuffer function. Meant for private use */
 	const arm_cfft_instance_f32* S; /*!< Pointer to @ref arm_cfft_instance_f32 structure. Meant for private use */
 	float32_t MaxValue;             /*!< Max value in FTT result after calculation */
 	uint32_t MaxIndex;              /*!< Index in output array where max value happened */
-} TM_FFT_F32_t;
+} FFT_F32_t;
 
 /**
  * @}
  */
 
 /**
- * @defgroup TM_FFT_Functions
+ * @defgroup FFT_Functions
  * @brief    Library Functions
  * @{
  */
 
 /**
  * @brief  Initializes and prepares FFT structure for signal operations
- * @param  *FFT: Pointer to empty @ref TM_FFT_F32_t structure for FFT
+ * @param  *FFT: Pointer to empty @ref FFT_F32_t structure for FFT
  * @param  FFT_Size: Number of samples to be used for FFT calculation
  *            This parameter can be a value of 2^n where n is between 4 and 12, so any power of 2 between 16 and 4096
  * @param  use_malloc: Set parameter to 1, if you want to use HEAP memory and @ref malloc to allocate input and output buffers
@@ -137,76 +134,76 @@ typedef struct {
  *            - 2: Malloc failed with allocating input data buffer
  *            - 3: Malloc failed with allocating output data buffer. If input data buffer is allocated, it will be free if this is returned.
  */
-uint8_t TM_FFT_Init_F32(TM_FFT_F32_t* FFT, uint16_t FFT_Size, uint8_t use_malloc);
+uint8_t FFT_Init_F32(FFT_F32_t* FFT, uint16_t FFT_Size, uint8_t use_malloc);
 
 /**
  * @brief  Sets input and output buffers for FFT calculations
- * @note   Use this function only if you set @arg use_malloc parameter to zero in @ref TM_FFT_Init_F32 function
- * @param  *FFT: Pointer to @ref TM_FFT_F32_t structure where buffers will be set
+ * @note   Use this function only if you set @arg use_malloc parameter to zero in @ref FFT_Init_F32 function
+ * @param  *FFT: Pointer to @ref FFT_F32_t structure where buffers will be set
  * @param  *InputBuffer: Pointer to buffer of type float32_t with FFT_Size * 2 length
  * @param  *OutputBuffer: Pointer to buffer of type float32_t with FFT_Size length
  * @retval None
  */
-void TM_FFT_SetBuffers_F32(TM_FFT_F32_t* FFT, float32_t* InputBuffer, float32_t* OutputBuffer);
+void FFT_SetBuffers_F32(FFT_F32_t* FFT, float32_t* InputBuffer, float32_t* OutputBuffer);
 
 /**
  * @brief  Adds new sample to input buffer in FFT array 
- * @param  *FFT: Pointer to @ref TM_FFT_F32_t structure where new sample will be added
+ * @param  *FFT: Pointer to @ref FFT_F32_t structure where new sample will be added
  * @param  sampleValue: A new sample to be added to buffer, real part. Imaginary part will be set to 0
  * @retval FFT calculation status:
  *            - 0: Input buffer is not full yet
  *            - > 0: Input buffer is full and samples are ready to be calculated
  */
-uint8_t TM_FFT_AddToBuffer(TM_FFT_F32_t* FFT, float32_t sampleValue);
+uint8_t FFT_AddToBuffer(FFT_F32_t* FFT, float32_t sampleValue);
 
 /**
  * @brief  Processes and calculates FFT from InputBuffer and saves data to Output buffer
  * @note   This function also calculates max value and max index in array where max value happens
- * @param  *FFT: Pointer to @ref TM_FFT_F32_t where FFT calculation will happen
+ * @param  *FFT: Pointer to @ref FFT_F32_t where FFT calculation will happen
  * @retval None
  */
-void TM_FFT_Process_F32(TM_FFT_F32_t* FFT);
+void FFT_Process_F32(FFT_F32_t* FFT);
 
 /**
  * @brief  Free input and output buffers
- * @note   This function has sense only, if you used @ref malloc for memory allocation when you called @ref TM_FFT_Init_F32 function
- * @param  *FFT: Pointer to @ref TM_FFT_F32_t structure where buffers will be free
+ * @note   This function has sense only, if you used @ref malloc for memory allocation when you called @ref FFT_Init_F32 function
+ * @param  *FFT: Pointer to @ref FFT_F32_t structure where buffers will be free
  * @retval None
  */
-void TM_FFT_Free_F32(TM_FFT_F32_t* FFT);
+void FFT_Free_F32(FFT_F32_t* FFT);
 
 /**
  * @brief  Gets max value from already calculated FFT result
- * @param  FFT: Pointer to @ref TM_FFT_F32_t structure where max value should be checked
+ * @param  FFT: Pointer to @ref FFT_F32_t structure where max value should be checked
  * @retval None
  * @note   Defined as macro for faster execution
  */
-#define TM_FFT_GetMaxValue(FFT)            ((FFT)->MaxValue)
+#define FFT_GetMaxValue(FFT)            ((FFT)->MaxValue)
 
 /**
  * @brief  Gets index value where max value happens from already calculated FFT result
- * @param  FFT: Pointer to @ref TM_FFT_F32_t structure where max index at max value should be checked
+ * @param  FFT: Pointer to @ref FFT_F32_t structure where max index at max value should be checked
  * @retval None
  * @note   Defined as macro for faster execution
  */
-#define TM_FFT_GetMaxIndex(FFT)            ((FFT)->MaxIndex)
+#define FFT_GetMaxIndex(FFT)            ((FFT)->MaxIndex)
 
 /**
  * @brief  Gets FFT size in units of samples length
- * @param  FFT: Pointer to @ref TM_FFT_F32_t structure where FFT size will be checked
+ * @param  FFT: Pointer to @ref FFT_F32_t structure where FFT size will be checked
  * @retval FFT size in units of elements for calculation
  * @note   Defined as macro for faster execution
  */
-#define TM_FFT_GetFFTSize(FFT)             ((FFT)->FFT_Size)
+#define FFT_GetFFTSize(FFT)             ((FFT)->FFT_Size)
 
 /**
  * @brief  Gets FFT result value from output buffer at given index
- * @param  FFT: Pointer to @ref TM_FFT_F32_t structure where FFT output sample will be returned
+ * @param  FFT: Pointer to @ref FFT_F32_t structure where FFT output sample will be returned
  * @param  index: Index in buffer where result will be returned. Valid input is between 0 and FFT_Size - 1
  * @retval Value at given index
  * @note   Defined as macro for faster execution
  */
-#define TM_FFT_GetFromBuffer(FFT, index)   ((FFT)->Output[(uint16_t)(index)])
+#define FFT_GetFromBuffer(FFT, index)   ((FFT)->Output[(uint16_t)(index)])
 
 /**
  * @}

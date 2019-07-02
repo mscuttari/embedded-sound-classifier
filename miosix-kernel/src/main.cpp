@@ -3,8 +3,8 @@
 #include <functional>
 #include <termios.h>
 #include "button.h"
+#include "fft.h"
 #include "microphone.h"
-#include "tm_stm32f4_fft.h"
 #include "window.h"
 
 
@@ -65,12 +65,12 @@ float normalize(T value, bool sign);
 
 
 #define FFT_SIZE 1024               // FFT window size
-static TM_FFT_F32_t FFT;            // FFT data structure
+static FFT_F32_t FFT;               // FFT data structure
 static HannWindow hann(FFT_SIZE);   // Window function
 
 
 int main() {
-    TM_FFT_Init_F32(&FFT, FFT_SIZE, 1);
+    FFT_Init_F32(&FFT, FFT_SIZE, 1);
 
     // Peripherals setup
     Microphone& microphone = Microphone::getInstance();
@@ -94,8 +94,8 @@ int main() {
 
 
 void setRawStdout() {
-    struct termios t;
-    tcgetattr(STDOUT_FILENO,&t);
+    struct termios t{};
+    tcgetattr(STDOUT_FILENO, &t);
     t.c_lflag &= ~(ISIG | ICANON);
     tcsetattr(STDOUT_FILENO,TCSANOW, &t);
 }
@@ -127,24 +127,24 @@ void sendStopSignal() {
 
 
 void scanAudio(short* data, unsigned int n) {
-    for (int i = 0; i < n; i++) {
+    for (unsigned int i = 0; i < n; i++) {
         float value = normalize<short>(data[i], true);
         value = hann.apply(value, i);
-        TM_FFT_AddToBuffer(&FFT, value);
+        FFT_AddToBuffer(&FFT, value);
     }
 
     for (int i = n; i < FFT_SIZE; i++) {
-        TM_FFT_AddToBuffer(&FFT, 0);
+        FFT_AddToBuffer(&FFT, 0);
     }
 
-    TM_FFT_Process_F32(&FFT);
+    FFT_Process_F32(&FFT);
 
     #ifdef TRAINING
         int s = FFT_SIZE / 2 * sizeof(float);
         write(STDOUT_FILENO, &s, sizeof(int));
 
         for (int i = 0; i < FFT_SIZE / 2; i++) {
-            float value = TM_FFT_GetFromBuffer(&FFT, i);
+            float value = FFT_GetFromBuffer(&FFT, i);
             write(STDOUT_FILENO, &value, sizeof(float));
         }
     #endif
@@ -159,7 +159,7 @@ float normalize(T value, bool sign) {
     T *normalizationFactor = (T*) malloc(sizeof(T));
 
     // Set all the bits to 1
-    for (int i = 0; i < sizeof(T); i++) {
+    for (unsigned int i = 0; i < sizeof(T); i++) {
         for (int j = 0; j < 8; j++) {
             *((char*) normalizationFactor + i) |= 1 << j;
         }

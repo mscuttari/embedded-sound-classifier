@@ -16,7 +16,7 @@
  * | along with this program.  If not, see <http://www.gnu.org/licenses/>.
  * |----------------------------------------------------------------------
  */
-#include "tm_stm32f4_fft.h"
+#include "fft.h"
 #include "stdlib.h"
 
 /* Array with constants for CFFT module */
@@ -33,7 +33,7 @@ const arm_cfft_instance_f32 CFFT_Instances[] = {
 	{4096, twiddleCoef_4096, armBitRevIndexTable4096, ARMBITREVINDEXTABLE4096_TABLE_LENGTH}
 };
 
-uint8_t TM_FFT_Init_F32(TM_FFT_F32_t* FFT, uint16_t FFT_Size, uint8_t use_malloc) {
+uint8_t FFT_Init_F32(FFT_F32_t* FFT, uint16_t FFT_Size, uint8_t use_malloc) {
 	uint8_t i;
 	
 	/* Set to zero */
@@ -91,7 +91,7 @@ uint8_t TM_FFT_Init_F32(TM_FFT_F32_t* FFT, uint16_t FFT_Size, uint8_t use_malloc
 	return 0;
 }
 
-void TM_FFT_SetBuffers_F32(TM_FFT_F32_t* FFT, float32_t* InputBuffer, float32_t* OutputBuffer) {
+void FFT_SetBuffers_F32(FFT_F32_t* FFT, float32_t* InputBuffer, float32_t* OutputBuffer) {
 	/* If malloc is used, ignore */
 	if (FFT->UseMalloc) {
 		return;
@@ -102,7 +102,7 @@ void TM_FFT_SetBuffers_F32(TM_FFT_F32_t* FFT, float32_t* InputBuffer, float32_t*
 	FFT->Output = OutputBuffer;
 }
 
-uint8_t TM_FFT_AddToBuffer(TM_FFT_F32_t* FFT, float32_t sampleValue) {
+uint8_t FFT_AddToBuffer(FFT_F32_t* FFT, float32_t sampleValue) {
 	/* Check if memory available */
 	if (FFT->Count < FFT->FFT_Size) {
 		/* Add to buffer, real part */
@@ -124,7 +124,7 @@ uint8_t TM_FFT_AddToBuffer(TM_FFT_F32_t* FFT, float32_t sampleValue) {
 	return 0;
 }
 
-void TM_FFT_Process_F32(TM_FFT_F32_t* FFT) {
+void FFT_Process_F32(FFT_F32_t* FFT) {
 	/* Process FFT input data */
 	arm_cfft_f32(FFT->S, FFT->Input, 0, 1);
 	
@@ -138,7 +138,7 @@ void TM_FFT_Process_F32(TM_FFT_F32_t* FFT) {
 	FFT->Count = 0;
 }
 
-void TM_FFT_Free_F32(TM_FFT_F32_t* FFT) {
+void FFT_Free_F32(FFT_F32_t* FFT) {
 	/* Free input buffer */
 	if (!FFT->UseMalloc) {
 		/* Return, malloc was not used for allocation */
