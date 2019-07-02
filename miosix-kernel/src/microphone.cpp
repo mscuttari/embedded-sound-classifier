@@ -3,25 +3,19 @@
 #include <functional>
 #include <kernel/scheduler/scheduler.h>
 
-// Keep only 1 / DECIMATION_FACTOR of audio samples
-#define DECIMATION_FACTOR 4
-
-// Number of samples to be processed at time
-#define SAMPLES_AT_TIME 5000 
-
 using namespace std;
 using namespace miosix;
 
-typedef Gpio<GPIOB_BASE, 10> clk;
-typedef Gpio<GPIOC_BASE, 3> dout;
+typedef Gpio<GPIOB_BASE, 10> clk;   // CLK pin
+typedef Gpio<GPIOC_BASE, 3> dout;   // Microphone signal pin
 
-static const int bufferSize = 512; // Buffer RAM is 4 * bufferSize bytes
-static const int bufNum = 2;
+static const int bufferSize = 512;
+static const int bufferNumber = 2;
+static BufferQueue<unsigned short, bufferSize, bufferNumber> *bq;
+
 static Thread *waiting;
-static BufferQueue<unsigned short, bufferSize, bufNum> *bq;
 static bool enobuf = true;
 static const char filterOrder = 4;
-static const short oversample = 16;
 static unsigned short intReg[filterOrder] = {0,0,0,0};
 static unsigned short combReg[filterOrder] = {0,0,0,0};
 static signed char pdmLUT[] = {-1, 1};
@@ -101,10 +95,10 @@ void __attribute__((naked)) DMA1_Stream3_IRQHandler() {
  * DMA end of transfer interrupt actual implementation
  */
 void __attribute__((used)) I2SdmaHandlerImpl() {
-    DMA1->LIFCR=DMA_LIFCR_CTCIF3  |
-                DMA_LIFCR_CTEIF3  |
-                DMA_LIFCR_CDMEIF3 |
-                DMA_LIFCR_CFEIF3;
+    DMA1->LIFCR = DMA_LIFCR_CTCIF3  |
+                  DMA_LIFCR_CTEIF3  |
+                  DMA_LIFCR_CDMEIF3 |
+                  DMA_LIFCR_CFEIF3;
     
     bq->bufferFilled(bufferSize);
     IRQdmaRefill();
@@ -122,32 +116,28 @@ Microphone& Microphone::getInstance() {
 
 
 Microphone::Microphone() {
-    PCMsize = SAMPLES_AT_TIME * DECIMATION_FACTOR;
-    compressed_buf_size_bytes = (PCMsize / DECIMATION_FACTOR) / 2;
+
 }
 
 
-void Microphone::start(function<void (short*, unsigned int)> callback) {
-    this->callback = callback;
-    recording = true;
-    readyBuffer = (short*) malloc(sizeof(short) * PCMsize);
-    processingBuffer = (short*) malloc(sizeof(short) * PCMsize);
-    
-    // I put 1 sample every DECIMATION_FACTOR - 1 samples
-    decimatedReadyBuffer = (short*) malloc(sizeof(short) * PCMsize / DECIMATION_FACTOR);
-    decimatedProcessingBuffer = (short*) malloc(sizeof(short) * PCMsize / DECIMATION_FACTOR);
-
-    compressedBuf = (unsigned char*) malloc(compressed_buf_size_bytes*sizeof(char));
+void Microphone::start(function<void (short*, unsigned int)> cb, unsigned int buffsize) {
+    this->callback = cb;
+    this->PCMsize = buffsize;
+    this->recording = true;
+    this->readyBuffer = (short*) malloc(PCMsize * sizeof(short));
+    this->processingBuffer = (short*) malloc(PCMsize * sizeof(short));
     
     {
         FastInterruptDisableLock dLock;
         
-        // Enable DMA1 and SPI2/I2S2 and GPIOB and GPIOC
+        // Enable DMA1, SPI2, GPIOB and GPIOC
         RCC->AHB1ENR |= RCC_AHB1ENR_DMA1EN;
         RCC->APB1ENR |= RCC_APB1ENR_SPI2EN;   
         RCC->AHB1ENR |= RCC_AHB1ENR_GPIOBEN | RCC_AHB1ENR_GPIOCEN;
         
         // Configure GPIOs
+        // (see chapter 8.3.2 of the datasheet for the alternate functions list)
+
         clk::mode(Mode::ALTERNATE);
         clk::alternateFunction(5);
         clk::speed(Speed::_50MHz);
@@ -156,9 +146,17 @@ void Microphone::start(function<void (short*, unsigned int)> callback) {
         dout::alternateFunction(5);
         dout::speed(Speed::_50MHz);
 
-        // I2S PLL Clock Frequency: 135.5 Mhz
-        RCC->PLLI2SCFGR=(2<<28) | (271<<6);
-        
+        // Set the 16 kHz sampling rate
+        // (see chapters 7.3.23 and 28.4.4 of the datasheet for further details)
+
+        const unsigned int PLLI2S_N = 213;
+        const unsigned int PLLI2S_R = 2;
+        const unsigned int I2SDIV = 13;
+
+        SPI2->I2SPR = (I2SDIV << 0);
+        RCC->PLLI2SCFGR = (PLLI2S_R << 28) | (PLLI2S_N << 6);
+
+        // Enable I2S
         RCC->CR |= RCC_CR_PLLI2SON;
     }
     
@@ -166,14 +164,18 @@ void Microphone::start(function<void (short*, unsigned int)> callback) {
     while ((RCC->CR & RCC_CR_PLLI2SRDY) == 0);
     
     // RX buffer not empty interrupt enable
-    SPI2->CR2 = SPI_CR2_RXDMAEN;  
-    
-    SPI2->I2SPR = SPI_I2SPR_MCKOE | 12;
+    SPI2->CR2 = SPI_CR2_RXDMAEN;
+
+    // Enable the master clock for I2S
+    SPI2->I2SPR |= SPI_I2SPR_MCKOE;
 
     // Configure SPI
-    SPI2->I2SCFGR = SPI_I2SCFGR_I2SMOD | SPI_I2SCFGR_I2SCFG_0 | SPI_I2SCFGR_I2SCFG_1 | SPI_I2SCFGR_I2SE;
+    SPI2->I2SCFGR = SPI_I2SCFGR_I2SMOD |                            // I2S mode selected
+                    SPI_I2SCFGR_I2SE |                              // I2S enabled
+                    SPI_I2SCFGR_I2SCFG_0 | SPI_I2SCFGR_I2SCFG_1;    // Mode: master receive
 
-    NVIC_SetPriority(DMA1_Stream3_IRQn, 2); // High priority for DMA
+    // High priority for DMA
+    NVIC_SetPriority(DMA1_Stream3_IRQn, 2);
 
     // Wait for the microphone to enable
     delayMs(10);
@@ -192,17 +194,15 @@ void Microphone::stop() {
     // Reset the configuration registers to stop the hardware
     NVIC_DisableIRQ(DMA1_Stream3_IRQn);
     delete bq;
-    SPI2->I2SCFGR=0;
+    SPI2->I2SCFGR = 0;
     
     {
         FastInterruptDisableLock dLock;
         RCC->CR &= ~RCC_CR_PLLI2SON;
     }
-    
+
     free(readyBuffer);
     free(processingBuffer);
-    free(decimatedProcessingBuffer);
-    free(decimatedReadyBuffer);
 }
 
 
@@ -215,7 +215,7 @@ void* Microphone::mainLoopLauncher(void* arg) {
 void Microphone::mainLoop() {
     waiting = Thread::getCurrentThread();
     pthread_t cback;
-    bq = new BufferQueue<unsigned short, bufferSize, bufNum>();
+    bq = new BufferQueue<unsigned short, bufferSize, bufferNumber>();
     NVIC_EnableIRQ(DMA1_Stream3_IRQn);
     
     // Create the thread that will execute the callbacks 
@@ -223,18 +223,19 @@ void Microphone::mainLoop() {
     isBufferReady = false;
     
     // Variable used for swap of processing and ready buffer
-    short *tmp, *decimatedTmp;
+    short *tmp;
 
     while (recording) {
-        PCMindex = 0;      
+        PCMindex = 0;
+
         // Process any new chunk of PDM samples
-        for (;;){
+        for (;;) {
             if (enobuf) {
                 enobuf = false;
                 dmaRefill();
             }
             
-            if (processPDM(getReadableBuffer(), bufferSize)){
+            if (processPdm(getReadableBuffer(), bufferSize)){
                 // Transcode until the specified number of PCM samples
                 break;
             }
@@ -244,23 +245,20 @@ void Microphone::mainLoop() {
         
         // Swap the ready and the processing buffer: allows double buffering
         // on the callback side
-        tmp = readyBuffer;
-        decimatedTmp = decimatedReadyBuffer;
 
-        readyBuffer = processingBuffer;
-        decimatedReadyBuffer = decimatedProcessingBuffer;
-        // perform encoding using ADPCM codec
-        encode(&state, decimatedReadyBuffer, PCMsize / DECIMATION_FACTOR, compressedBuf);
+        tmp = readyBuffer;
 
         // Start critical section
         pthread_mutex_lock(&bufMutex);
+
+        readyBuffer = processingBuffer;
         isBufferReady = true;
+
         pthread_cond_broadcast(&cbackExecCond);
         pthread_mutex_unlock(&bufMutex);
         // End critical section
-        
+
         processingBuffer = tmp;
-        decimatedProcessingBuffer = tmp;
     }
     
     pthread_cond_broadcast(&cbackExecCond);
@@ -280,51 +278,35 @@ void Microphone::execCallback() {
         
         while (recording && !isBufferReady)
             pthread_cond_wait(&cbackExecCond, &bufMutex);
-        
-        callback((short*)compressedBuf, compressed_buf_size_bytes);
+
+        callback(readyBuffer, PCMsize);
         isBufferReady = false;
+
         pthread_mutex_unlock(&bufMutex);
     }
 }
 
 
-bool Microphone::processPDM(const unsigned short *pdmbuffer, int size) {
-    int decimatedIndex;
+bool Microphone::processPdm(const unsigned short *pdmBuffer, int size) {
     int remaining = PCMsize - PCMindex;
-    int length = remaining < size ? remaining : size; 
-    short int s;
+    int length = min(remaining, size);
 
-    for (int i=0; i < length; i++){    
-        // Convert couples 16 pdm one-bit samples in one signed 16-bit PCM sample
-        s = PDMFilter(pdmbuffer, i);
-        processingBuffer[PCMindex] = s;
-        decimatedIndex = PCMindex / DECIMATION_FACTOR;
-        
-        if (PCMindex - (decimatedIndex * DECIMATION_FACTOR) == 0) {
-            decimatedProcessingBuffer[decimatedIndex] = s;
-        }
-        
-        PCMindex++;
+    for (int i = 0; i < length; i++){
+        processingBuffer[PCMindex++] = PDMFilter(pdmBuffer, i);
     }
 
-    if (PCMindex < PCMsize) // If produced PCM sample are not enough
-        return false;
-
-    return true;
+    return PCMindex >= PCMsize;
 }
 
 
-/*
- * This function takes care of the transcoding from 16 PDM bit to 1 PCM sample
- * via CIC filtering. Decimator rate: 16:1, CIC stages: 4.
- */
-unsigned short Microphone::PDMFilter(const unsigned short* PDMBuffer, unsigned int index) {
-    short combInput, combRes;
+
+short Microphone::PDMFilter(const unsigned short *pdmBuffer, unsigned int index) {
+    short combInput, combRes = 0;
     
     // Perform integration on the first word of the PDM chunk to be filtered
     for (short i=0; i < 16; i++){
         // Integrate each single bit
-        intReg[0] += pdmLUT[(PDMBuffer[index] >> (15-i)) & 1];
+        intReg[0] += pdmLUT[(pdmBuffer[index] >> (15-i)) & 1];
         
         for (short j=1; j < filterOrder; j++){
             intReg[j] += intReg[j-1];
@@ -335,7 +317,7 @@ unsigned short Microphone::PDMFilter(const unsigned short* PDMBuffer, unsigned i
     combInput = intReg[filterOrder-1];
     
     // Apply the comb filter (with delay 1):
-    for (short i = 0; i < filterOrder; i++){
+    for (short i=0; i < filterOrder; i++){
         combRes = combInput - combReg[i];
         combReg[i] = combInput;
         combInput = combRes;

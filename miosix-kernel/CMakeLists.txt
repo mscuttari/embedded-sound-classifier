@@ -10,10 +10,10 @@ set(TOOLCHAIN_PATH "C:/arm-miosix-eabi")
 ## Path to kernel directory
 set(KPATH miosix)
 
-## List here additional static libraries with relative path
-set(LIBS "")
+## List here additional static libraries
+file(GLOB LIBS "src/lib/libarm_cortexM4lf_math.a")
 
-## List here additional include directories (in the form -Iinclude_dir)
+## List here additional include directories
 set(INCLUDE_DIRS "")
 
 ##
@@ -80,6 +80,7 @@ include_directories(
 set(DFLAGS "-MMD -MP")
 set(LFLAGS ${LFLAGS_BASE})
 
+string (REPLACE ";" " " LIBS "${LIBS}")
 set(LINK_LIBS "${LIBS} -L${CMAKE_CURRENT_BINARY_DIR}/${KPATH_REL} -Wl,--start-group -lmiosix -lstdc++ -lc -lm -lgcc -Wl,--end-group")
 
 set(CMAKE_C_FLAGS "${DFLAGS} ${CFLAGS_BASE}")

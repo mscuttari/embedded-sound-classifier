@@ -11,10 +11,7 @@ static bool justPushed = false;
 static Thread *t;
 
 
-/**
- * Initialize the user button peripheral
- */
-static void initialize() {
+void UserButton::initialize() {
     // Temporarily disable the interrupts in order to safely
     // configure the GPIO interface
     FastInterruptDisableLock dLock;
@@ -77,10 +74,6 @@ void __attribute__((used)) EXTI0HandlerImpl() {
 }
 
 
-/**
- * Call this function to wait for the user to click the button.
- * The calling thread is paused.
- */
 void UserButton::wait() {
     // Initialize the peripheral in case of first call
     if (!initialized) {
