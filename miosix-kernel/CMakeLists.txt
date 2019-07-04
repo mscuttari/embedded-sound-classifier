@@ -11,7 +11,7 @@ set(TOOLCHAIN_PATH "C:/arm-miosix-eabi")
 set(KPATH miosix)
 
 ## List here additional static libraries
-file(GLOB LIBS "src/lib/libarm_cortexM4lf_math.a")
+file(GLOB LIBS "src/lib/*.a")
 
 ## List here additional include directories
 set(INCLUDE_DIRS "")
@@ -19,7 +19,7 @@ set(INCLUDE_DIRS "")
 ##
 ## List here your source files (both .s, .c and .cpp)
 ##
-file(GLOB SOURCES src/*.c src/*.cpp)
+file(GLOB_RECURSE SOURCES "src/*.c" "src/*.cpp")
 
 
 

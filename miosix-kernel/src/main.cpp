@@ -2,10 +2,10 @@
 #include <miosix.h>
 #include <functional>
 #include <termios.h>
-#include "button.h"
-#include "fft.h"
-#include "microphone.h"
-#include "window.h"
+#include "fft/fft.h"
+#include "fft/window.h"
+#include "peripheral/button.h"
+#include "peripheral/microphone.h"
 
 
 // Uncomment to switch to FFT data transfer mode.
