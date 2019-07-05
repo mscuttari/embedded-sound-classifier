@@ -3,6 +3,7 @@
 
 class UserButton {
 public:
+
     UserButton() = delete;
 
     /**

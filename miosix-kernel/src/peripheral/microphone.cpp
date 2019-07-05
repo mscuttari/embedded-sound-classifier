@@ -1,10 +1,5 @@
 #include "microphone.h"
-#include <miosix.h>
-#include <functional>
 #include <kernel/scheduler/scheduler.h>
-
-using namespace std;
-using namespace miosix;
 
 typedef Gpio<GPIOB_BASE, 10> clk;   // CLK pin
 typedef Gpio<GPIOC_BASE, 3> dout;   // Microphone signal pin

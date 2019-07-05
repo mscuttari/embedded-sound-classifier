@@ -16,16 +16,22 @@ SUBDIRS := $(KPATH)
 ##
 ## List here your source files (both .s, .c and .cpp)
 ##
-SRC :=                  \
-src/main.cpp		\
-src/button.cpp		\
-src/microphone.cpp	\
-src/codec.cpp
+SRC := \
+src/main.cpp \
+src/fft/fft.c \
+src/fft/window.cpp \
+src/neural-network/aeabi_memcpy.c \
+src/neural-network/arm_dot_prod_f32.c \
+src/neural-network/network.c \
+src/neural-network/network_data.c \
+src/peripheral/button.cpp \
+src/peripheral/crc.cpp \
+src/peripheral/microphone.cpp
 
 ##
 ## List here additional static libraries with relative path
 ##
-LIBS :=
+LIBS := lib/arm_cortexM4lf_math.a lib/network_runtime.a
 
 ##
 ## List here additional include directories (in the form -Iinclude_dir)

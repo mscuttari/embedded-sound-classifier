@@ -11,7 +11,7 @@ set(TOOLCHAIN_PATH "C:/arm-miosix-eabi")
 set(KPATH miosix)
 
 ## List here additional static libraries
-file(GLOB LIBS "src/lib/*.a")
+file(GLOB LIBS "lib/*.a")
 
 ## List here additional include directories
 set(INCLUDE_DIRS "")

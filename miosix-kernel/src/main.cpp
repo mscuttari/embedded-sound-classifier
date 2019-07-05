@@ -4,8 +4,11 @@
 #include <termios.h>
 #include "fft/fft.h"
 #include "fft/window.h"
+#include "neural-network/network.h"
+#include "neural-network/network_data.h"
 #include "peripheral/button.h"
 #include "peripheral/microphone.h"
+#include "peripheral/crc.h"
 
 
 // Uncomment to switch to FFT data transfer mode.
@@ -64,31 +67,76 @@ template<typename T>
 float normalize(T value, bool sign);
 
 
-#define FFT_SIZE 1024               // FFT window size
-static FFT_F32_t FFT;               // FFT data structure
-static HannWindow hann(FFT_SIZE);   // Window function
+/**
+ * Feed the neural network
+ *
+ * @param input         input buffer
+ * @param output        output buffer
+ * @param batchSize     batch size
+ *
+ * @return number of input tensors processed
+ */
+int nnRun(const ai_float *input, const ai_float *output, ai_u16 batchSize);
+
+
+// FFT
+#define FFT_SIZE 1024
+static FFT_F32_t FFT;
+static float fftInput[FFT_SIZE * 2];
+static float fftOutput[FFT_SIZE];
+static HannWindow hann(FFT_SIZE);
+
+
+// Neural network
+static ai_handle network = AI_HANDLE_NULL;
+AI_ALIGNED(4) static ai_u8 nn_activations[AI_NETWORK_DATA_ACTIVATIONS_SIZE];
+static ai_buffer nnInput[AI_NETWORK_IN_NUM] = { AI_NETWORK_IN_1 };
+static ai_buffer nnOutput[AI_NETWORK_OUT_NUM] = { AI_NETWORK_OUT_1 };
 
 
 int main() {
-    FFT_Init_F32(&FFT, FFT_SIZE, 1);
-
     // Peripherals setup
     Microphone& microphone = Microphone::getInstance();
+    Crc::init();
     setRawStdout();
 
-    // Start the recording on user button press
-    UserButton::wait();
-    sendStartSignal();
-    microphone.start(bind(scanAudio, placeholders::_1, placeholders::_2), FFT_SIZE);
+    // FFT structure setup
+    FFT_Init_F32(&FFT, FFT_SIZE, 0);
+    FFT_SetBuffers_F32(&FFT, fftInput, fftOutput);
 
-    // Stop on second button press
-    UserButton::wait();
-    microphone.stop();
-    sendStopSignal();
+    // Neural network setup
+    print("Reachable\n");
+    ai_error aiError = ai_network_create(&network, (ai_buffer*) AI_NETWORK_DATA_CONFIG);
+    print("Not reachable\n");
 
-    // Endless loop
+    if (aiError.type != AI_ERROR_NONE) {
+        // An error happened during the creation of the neural network
+        printf("AI creation error - type = %lu, code = %lu\n", aiError.type, aiError.code);
+        while(true);
+    }
+
+    const ai_network_params networkParams = AI_NETWORK_PARAMS_INIT(
+            AI_NETWORK_DATA_WEIGHTS(ai_network_data_weights_get()),
+            AI_NETWORK_DATA_ACTIVATIONS(nn_activations)
+    );
+
+    if (!ai_network_init(&network, &networkParams)) {
+        ai_error error = ai_network_get_error(&network);
+        printf("AI initialization error - type = %lu, code = %lu\n", error.type, error.code);
+        while(true);
+    }
+
+
     while (true) {
-        
+        // Start the recording on user button press
+        UserButton::wait();
+        sendStartSignal();
+        microphone.start(bind(scanAudio, placeholders::_1, placeholders::_2), FFT_SIZE);
+
+        // Stop on second button press
+        UserButton::wait();
+        microphone.stop();
+        sendStopSignal();
     }
 }
 
@@ -142,11 +190,9 @@ void scanAudio(short* data, unsigned int n) {
     #ifdef TRAINING
         int s = FFT_SIZE / 2 * sizeof(float);
         write(STDOUT_FILENO, &s, sizeof(int));
+        write(STDOUT_FILENO, fftOutput, s);
+    #else
 
-        for (int i = 0; i < FFT_SIZE / 2; i++) {
-            float value = FFT_GetFromBuffer(&FFT, i);
-            write(STDOUT_FILENO, &value, sizeof(float));
-        }
     #endif
 }
 
@@ -175,4 +221,14 @@ float normalize(T value, bool sign) {
 
     free(normalizationFactor);
     return result;
+}
+
+
+int nnRun(const ai_float *input, const ai_float *output, const ai_u16 batchSize) {
+    nnInput[0].n_batches = batchSize;
+    nnInput[0].data = AI_HANDLE_PTR(input);
+    nnOutput[0].n_batches = batchSize;
+    nnOutput[0].data = AI_HANDLE_PTR(output);
+
+    return ai_network_run(&network, &nnInput[0], &nnOutput[0]);
 }
