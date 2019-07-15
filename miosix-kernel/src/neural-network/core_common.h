@@ -109,10 +109,10 @@
   .forward = AI_NODE_FORWARD_FUNC(forward_), \
   .klass = AI_KLASS_OBJ(klass_)
 
-#define AI_FOR_EACH_NODE_DO(node_, nodes_) \
+#define AI_FOR_EACH_NODE_DO(node, nodes_) \
   ai_node* node; \
-  for ( node_ = AI_NODE_OBJ(nodes_); (node_); \
-        node_ = ((AI_NODE_IS_LAST(node_)) ? NULL : (node_)->next) )
+  for ( node = AI_NODE_OBJ(nodes_); (node); \
+        node = ((AI_NODE_IS_LAST(node)) ? NULL : (node)->next) )
 
 
 /**  TENSOR CHAINS LOOP MACROS & GETTERS  *************************************/
