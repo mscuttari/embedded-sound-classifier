@@ -77,6 +77,6 @@ set(CMAKE_ASM_FLAGS ${AFLAGS_BASE})
 set(CMAKE_CXX_ARCHIVE_CREATE "<CMAKE_AR> rcs <TARGET> <LINK_FLAGS> <OBJECTS>")
 set(CMAKE_C_ARCHIVE_CREATE "<CMAKE_AR> rcs <TARGET> <LINK_FLAGS> <OBJECTS>")
 
-add_library(miosix STATIC ${SOURCES})
+add_library(Miosix STATIC ${SOURCES})
 
 # TODO: run "perl _tools/kernel_global_objects.pl $(OBJ)"

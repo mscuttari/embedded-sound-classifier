@@ -26,7 +26,34 @@
  * limitations under the License.
  */
 
-#include <arch_settings.h>
+#ifdef _ARCH_ARM7_LPC2000
+#define ARM_MATH_CM7
+
+#elif _ARCH_CORTEXM3_STM32
+#define ARM_MATH_CM3
+
+#elif _ARCH_CORTEXM4_STM32F4
+#define ARM_MATH_CM4
+
+#elif _ARCH_CORTEXM3_STM32F2
+#define ARM_MATH_CM3
+
+#elif _ARCH_CORTEXM3_STM32L1
+#define ARM_MATH_CM3
+
+#elif _ARCH_CORTEXM3_EFM32GG
+#define ARM_MATH_CM3
+
+#elif _ARCH_CORTEXM7_STM32F7
+#define ARM_MATH_CM7
+
+#elif _ARCH_CORTEXM7_STM32H7
+#define ARM_MATH_CM7
+
+#else
+#error Invalid architecture
+#endif
+
 #include <interfaces/arch_registers.h>
 #include <CMSIS/Include/arm_math.h>
 

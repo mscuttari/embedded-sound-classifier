@@ -98,10 +98,11 @@ if (${OPT_BOARD} STREQUAL stm32f103ze_stm3210e-eval)
     ## Warning! enable external ram if you use a linker script that requires it
     ## (see the XRAM flag below)
 
-    set(LINKER_SCRIPT_PATH ${KPATH}/arch/cortexM3_stm32/stm32f103ze_stm3210e-eval/)
-    #set(LINKER_SCRIPT ${LINKER_SCRIPT_PATH}stm32_512k+64k_rom.ld)
-    #set(LINKER_SCRIPT ${LINKER_SCRIPT_PATH}stm32_512k+64k_xram.ld)
-    set(LINKER_SCRIPT ${LINKER_SCRIPT_PATH}stm32_512k+64k_all_in_xram.ld)
+    set(LINKER_SCRIPT_PATH ${KPATH}/arch/cortexM3_stm32/stm32f103ze_stm3210e-eval)
+
+    #set(LINKER_SCRIPT ${LINKER_SCRIPT_PATH}/stm32_512k+64k_rom.ld)
+    #set(LINKER_SCRIPT ${LINKER_SCRIPT_PATH}/stm32_512k+64k_xram.ld)
+    set(LINKER_SCRIPT ${LINKER_SCRIPT_PATH}/stm32_512k+64k_all_in_xram.ld)
 
     ## Enable/disable initialization of external RAM at boot. Three options:
     ## __ENABLE_XRAM : If you want the heap in xram (with an appropriate linker
@@ -135,9 +136,10 @@ if (${OPT_BOARD} STREQUAL stm32f103ve_mp3v2)
     ## 2) Code + stack + heap in internal RAM (file *_ram.ld)
     ## Note: this board relies on a bootloader for interrupt forwarding in ram
 
-    set(LINKER_SCRIPT_PATH ${KPATH}/arch/cortexM3_stm32/stm32f103ve_mp3v2/)
-    set(LINKER_SCRIPT ${LINKER_SCRIPT_PATH}stm32_512k+64k_rom.ld)
-    #set(LINKER_SCRIPT ${LINKER_SCRIPT_PATH}stm32_512k+64k_ram.ld)
+    set(LINKER_SCRIPT_PATH ${KPATH}/arch/cortexM3_stm32/stm32f103ve_mp3v2)
+
+    set(LINKER_SCRIPT ${LINKER_SCRIPT_PATH}/stm32_512k+64k_rom.ld)
+    #set(LINKER_SCRIPT ${LINKER_SCRIPT_PATH}/stm32_512k+64k_ram.ld)
 
 endif()
 
@@ -164,10 +166,11 @@ if (${OPT_BOARD} STREQUAL stm32f407vg_stm32f4discovery)
     ## 3) Same as 1) but space has been reserved for a process pool, allowing
     ##    to configure the kernel with "#define WITH_PROCESSES"
 
-    set(LINKER_SCRIPT_PATH ${KPATH}/arch/cortexM4_stm32f4/stm32f407vg_stm32f4discovery/)
-    set(LINKER_SCRIPT ${LINKER_SCRIPT_PATH}stm32_1m+192k_rom.ld)
-    #set(LINKER_SCRIPT ${LINKER_SCRIPT_PATH}stm32_1m+192k_ram.ld)
-    #set(LINKER_SCRIPT ${LINKER_SCRIPT_PATH}stm32_1m+192k_rom_processes.ld)
+    set(LINKER_SCRIPT_PATH ${KPATH}/arch/cortexM4_stm32f4/stm32f407vg_stm32f4discovery)
+
+    set(LINKER_SCRIPT ${LINKER_SCRIPT_PATH}/stm32_1m+192k_rom.ld)
+    #set(LINKER_SCRIPT ${LINKER_SCRIPT_PATH}/stm32_1m+192k_ram.ld)
+    #set(LINKER_SCRIPT ${LINKER_SCRIPT_PATH}/stm32_1m+192k_rom_processes.ld)
 
     ## This causes the interrupt vector table to be relocated in SRAM, must be
     ## uncommented when using the ram linker script
@@ -204,11 +207,12 @@ if (${OPT_BOARD} STREQUAL stm32f207ig_stm3220g-eval)
     ## Warning! enable external ram if you use a linker script that requires it
     ## (see the XRAM flag below)
 
-    set(LINKER_SCRIPT_PATH ${KPATH}/arch/cortexM3_stm32f2/stm32f207ig_stm3220g-eval/)
-    #set(LINKER_SCRIPT ${LINKER_SCRIPT_PATH}stm32_1m+128k_rom.ld)
-    #set(LINKER_SCRIPT ${LINKER_SCRIPT_PATH}stm32_1m+128k_xram.ld)
-    set(LINKER_SCRIPT ${LINKER_SCRIPT_PATH}stm32_1m+128k_all_in_xram.ld)
-    #set(LINKER_SCRIPT ${LINKER_SCRIPT_PATH}stm32_1m+128k_all_in_xram_processes.ld)
+    set(LINKER_SCRIPT_PATH ${KPATH}/arch/cortexM3_stm32f2/stm32f207ig_stm3220g-eval)
+
+    #set(LINKER_SCRIPT ${LINKER_SCRIPT_PATH}/stm32_1m+128k_rom.ld)
+    #set(LINKER_SCRIPT ${LINKER_SCRIPT_PATH}/stm32_1m+128k_xram.ld)
+    set(LINKER_SCRIPT ${LINKER_SCRIPT_PATH}/stm32_1m+128k_all_in_xram.ld)
+    #set(LINKER_SCRIPT ${LINKER_SCRIPT_PATH}/stm32_1m+128k_all_in_xram_processes.ld)
 
     ## Enable/disable initialization of external RAM at boot. Three options:
     ## __ENABLE_XRAM : If you want the heap in xram (with an appropriate linker
@@ -238,9 +242,10 @@ if (${OPT_BOARD} STREQUAL stm32f207zg_ethboard_v2)
     ##    one).
     ##    You must -D__CODE_IN_XRAM below.
 
-    set(LINKER_SCRIPT_PATH ${KPATH}/arch/cortexM3_stm32f2/stm32f207zg_EthBoardV2/)
-    #set(LINKER_SCRIPT ${LINKER_SCRIPT_PATH}stm32_1m+128k_rom.ld)
-    set(LINKER_SCRIPT ${LINKER_SCRIPT_PATH}stm32_1m+128k_code_in_xram.ld)
+    set(LINKER_SCRIPT_PATH ${KPATH}/arch/cortexM3_stm32f2/stm32f207zg_EthBoardV2)
+
+    #set(LINKER_SCRIPT ${LINKER_SCRIPT_PATH}/stm32_1m+128k_rom.ld)
+    set(LINKER_SCRIPT ${LINKER_SCRIPT_PATH}/stm32_1m+128k_code_in_xram.ld)
 
     ## XRAM is always enabled on this board, even if the _rom linker script
     ## does not make explicit use of it.
@@ -276,10 +281,11 @@ if (${OPT_BOARD} STREQUAL stm32f429zi_stm32f4discovery)
     ## 3) Code in FLASH, stack + heap in external RAM (file *6m_xram.ld)
     ##    Same as above, but leaves the upper 2MB of RAM for the LCD.
 
-    set(LINKER_SCRIPT_PATH ${KPATH}/arch/cortexM4_stm32f4/stm32f429zi_stm32f4discovery/)
-    #set(LINKER_SCRIPT ${LINKER_SCRIPT_PATH}stm32_2m+256k_rom.ld)
-    #set(LINKER_SCRIPT ${LINKER_SCRIPT_PATH}stm32_2m+8m_xram.ld)
-    set(LINKER_SCRIPT ${LINKER_SCRIPT_PATH}stm32_2m+6m_xram.ld)
+    set(LINKER_SCRIPT_PATH ${KPATH}/arch/cortexM4_stm32f4/stm32f429zi_stm32f4discovery)
+
+    #set(LINKER_SCRIPT ${LINKER_SCRIPT_PATH}/stm32_2m+256k_rom.ld)
+    #set(LINKER_SCRIPT ${LINKER_SCRIPT_PATH}/stm32_2m+8m_xram.ld)
+    set(LINKER_SCRIPT ${LINKER_SCRIPT_PATH}/stm32_2m+6m_xram.ld)
 
     ## Uncommenting __ENABLE_XRAM enables the initialization of the external
     ## 8MB SDRAM memory. Do not uncomment this even if you don't use a linker
@@ -324,10 +330,11 @@ if (${OPT_BOARD} STREQUAL stm32f429zi_oledboard2)
     ## 3) Code in FLASH, stack + heap in external RAM (file *6m_xram.ld)
     ##    Same as above, but leaves the upper 2MB of RAM for the LCD.
 
-    set(LINKER_SCRIPT_PATH ${KPATH}/arch/cortexM4_stm32f4/stm32f429zi_oledboard2/)
-    #set(LINKER_SCRIPT ${LINKER_SCRIPT_PATH}stm32_2m+256k_rom.ld)
-    #set(LINKER_SCRIPT ${LINKER_SCRIPT_PATH}stm32_2m+8m_xram.ld)
-    set(LINKER_SCRIPT ${LINKER_SCRIPT_PATH}stm32_2m+6m_xram.ld)
+    set(LINKER_SCRIPT_PATH ${KPATH}/arch/cortexM4_stm32f4/stm32f429zi_oledboard2)
+
+    #set(LINKER_SCRIPT ${LINKER_SCRIPT_PATH}/stm32_2m+256k_rom.ld)
+    #set(LINKER_SCRIPT ${LINKER_SCRIPT_PATH}/stm32_2m+8m_xram.ld)
+    set(LINKER_SCRIPT ${LINKER_SCRIPT_PATH}/stm32_2m+6m_xram.ld)
 
     ## Uncommenting __ENABLE_XRAM enables the initialization of the external
     ## 8MB SDRAM memory. Do not uncomment this even if you don't use a linker
@@ -357,6 +364,11 @@ endif()
 ##
 if (${OPT_BOARD} STREQUAL stm32f411re_nucleo)
 
+    # Linker script
+
+    set(LINKER_SCRIPT_PATH ${KPATH}/arch/cortexM4_stm32f4/stm32f411re_nucleo)
+    set(LINKER_SCRIPT ${LINKER_SCRIPT_PATH}/stm32_512k+128k_rom.ld)
+
     # Select clock frequency
 
     set(CLOCK_FREQ "-DHSE_VALUE=8000000 -DSYSCLK_FREQ_100MHz=100000000")
@@ -375,9 +387,10 @@ if (${OPT_BOARD} STREQUAL stm32f429zi_skyward_anakin)
     ## 2) Code in FLASH, stack + heap in external RAM (file *8m_xram.ld)
     ##    You must uncomment -D__ENABLE_XRAM below in this case.
 
-    set(LINKER_SCRIPT_PATH ${KPATH}/arch/cortexM4_stm32f4/stm32f429zi_skyward_anakin/)
-    #set(LINKER_SCRIPT ${LINKER_SCRIPT_PATH}stm32_2m+256k_rom.ld)
-    set(LINKER_SCRIPT ${LINKER_SCRIPT_PATH}stm32_2m+8m_xram.ld)
+    set(LINKER_SCRIPT_PATH ${KPATH}/arch/cortexM4_stm32f4/stm32f429zi_skyward_anakin)
+
+    #set(LINKER_SCRIPT ${LINKER_SCRIPT_PATH}/stm32_2m+256k_rom.ld)
+    set(LINKER_SCRIPT ${LINKER_SCRIPT_PATH}/stm32_2m+8m_xram.ld)
 
     ## Uncommenting __ENABLE_XRAM enables the initialization of the external
     ## 8MB SDRAM memory. Do not uncomment this even if you don't use a linker
@@ -406,13 +419,13 @@ endif()
 ##
 if (${OPT_BOARD} STREQUAL stm32f103c8_breakout)
 
-    ## Linker script type, there are two options
-    ## 1) Code in FLASH, stack + heap in RAM
-    ## 2) Code in FLASH, stack + heap in RAM flashing with bootloader
+    # Linker script
 
-    #set(LINKER_SCRIPT ${LINKER_SCRIPT_PATH}stm32_64k+20k_bootloader.ld)
+    set(LINKER_SCRIPT_PATH ${KPATH}/arch/cortexM3_stm32/stm32f103c8_breakout)
+    set(LINKER_SCRIPT ${LINKER_SCRIPT_PATH}/stm32_64k+20k_rom.ld)
 
     ## Select clock frequency
+
     set(CLOCK_FREQ -DSYSCLK_FREQ_24MHz=24000000)
     #set(CLOCK_FREQ -DSYSCLK_FREQ_36MHz=36000000)
     #set(CLOCK_FREQ -DSYSCLK_FREQ_48MHz=48000000)
@@ -440,10 +453,11 @@ if (${OPT_BOARD} STREQUAL stm32f469ni_stm32f469i-disco)
     ## 3) Code in FLASH, stack + heap in external RAM (file *12m_xram.ld)
     ##    Same as above, but leaves the upper 4MB of RAM for the LCD.
 
-    set(LINKER_SCRIPT_PATH ${KPATH}/arch/cortexM4_stm32f4/stm32f469ni_stm32f469i-disco/)
-    set(LINKER_SCRIPT ${LINKER_SCRIPT_PATH}stm32_2m+384k_rom.ld)
-    #set(LINKER_SCRIPT ${LINKER_SCRIPT_PATH}stm32_2m+16m_xram.ld)
-    #set(LINKER_SCRIPT ${LINKER_SCRIPT_PATH}stm32_2m+12m_xram.ld)
+    set(LINKER_SCRIPT_PATH ${KPATH}/arch/cortexM4_stm32f4/stm32f469ni_stm32f469i-disco)
+
+    set(LINKER_SCRIPT ${LINKER_SCRIPT_PATH}/stm32_2m+384k_rom.ld)
+    #set(LINKER_SCRIPT ${LINKER_SCRIPT_PATH}/stm32_2m+16m_xram.ld)
+    #set(LINKER_SCRIPT ${LINKER_SCRIPT_PATH}/stm32_2m+12m_xram.ld)
 
     ## Uncommenting __ENABLE_XRAM enables the initialization of the external
     ## 16MB SDRAM memory. Do not uncomment this even if you don't use a linker
@@ -474,9 +488,10 @@ if (${OPT_BOARD} STREQUAL stm32f429zi_skyward_homeone)
     ## 2) Code in FLASH, stack + heap in external RAM (file *8m_xram.ld)
     ##    You must uncomment -D__ENABLE_XRAM below in this case.
 
-    set(LINKER_SCRIPT_PATH ${KPATH}/arch/cortexM4_stm32f4/stm32f429zi_skyward_homeone/)
-    #set(LINKER_SCRIPT ${LINKER_SCRIPT_PATH}stm32_2m+256k_rom.ld)
-    set(LINKER_SCRIPT ${LINKER_SCRIPT_PATH}stm32_2m+8m_xram.ld)
+    set(LINKER_SCRIPT_PATH ${KPATH}/arch/cortexM4_stm32f4/stm32f429zi_skyward_homeone)
+
+    #set(LINKER_SCRIPT ${LINKER_SCRIPT_PATH}/stm32_2m+256k_rom.ld)
+    set(LINKER_SCRIPT ${LINKER_SCRIPT_PATH}/stm32_2m+8m_xram.ld)
 
     ## Uncommenting __ENABLE_XRAM enables the initialization of the external
     ## 8MB SDRAM memory.
@@ -519,9 +534,10 @@ if (${OPT_BOARD} STREQUAL stm32h753xi_eval)
     ## 2) Code in FLASH, stack + heap in external RAM (file *m_xram.ld)
     ##    You must uncomment -D__ENABLE_XRAM below in this case.
 
-    set(LINKER_SCRIPT_PATH ${KPATH}/arch/cortexM7_stm32h7/stm32h753xi_eval/)
-    set(LINKER_SCRIPT ${LINKER_SCRIPT_PATH}stm32_2m+512k_rom.ld)
-    #set(LINKER_SCRIPT ${LINKER_SCRIPT_PATH}stm32_2m+32m_xram.ld)
+    set(LINKER_SCRIPT_PATH ${KPATH}/arch/cortexM7_stm32h7/stm32h753xi_eval)
+
+    set(LINKER_SCRIPT ${LINKER_SCRIPT_PATH}/stm32_2m+512k_rom.ld)
+    #set(LINKER_SCRIPT ${LINKER_SCRIPT_PATH}/stm32_2m+32m_xram.ld)
 
 endif()
 
@@ -612,7 +628,7 @@ elseif (${OPT_BOARD} STREQUAL stm32f407vg_thermal_test_chip)
 elseif (${OPT_BOARD} STREQUAL stm32f205_generic)
     set(ARCH cortexM3_stm32f2)
 else()
-    message(FATAL_ERROR "no board specified in miosix/config/CMakeLists.txt")
+    message(FATAL_ERROR "No board specified in \"${CONFPATH}/CMakeLists.txt\"")
 endif()
 
 
@@ -637,6 +653,12 @@ if (${ARCH} STREQUAL arm7_lpc2000)
     ## Base directory with header files for this board
     set(ARCH_INC arch/arm7_lpc2000/common)
 
+    # Libraries
+    set(ARCH_LIBS
+            "${TOOLCHAIN_PATH}/arm-miosix-eabi/lib/libc.a \
+            ${TOOLCHAIN_PATH}/arm-miosix-eabi/lib/libstdc++.a \
+            ${TOOLCHAIN_PATH}/lib/gcc/arm-miosix-eabi/4.7.3/libgcc.a")
+
     ##-------------------------------------------------------------------------
     ## BOARD: lpc2138_miosix_board
     ##
@@ -647,7 +669,8 @@ if (${ARCH} STREQUAL arm7_lpc2000)
 
         ## Select linker script and boot file
         ## Their path must be relative to the miosix directory.
-        set(SOURCES BOOT_FILE ${KPATH}/${BOARD_INC}/core/stage_1_boot.cpp)
+
+        set(BOOT_FILE ${KPATH}/${BOARD_INC}/core/stage_1_boot.cpp)
         set(LINKER_SCRIPT ${KPATH}/arch/arm7_lpc2000/lpc2138_miosix_board/miosix.ld)
 
         ## Select architecture specific files
@@ -708,8 +731,15 @@ if (${ARCH} STREQUAL arm7_lpc2000)
 ## ARCHITECTURE: cortexM3_stm32
 ##
 elseif (${ARCH} STREQUAL cortexM3_stm32)
+
     ## Base directory with header files for this board
     set(ARCH_INC arch/cortexM3_stm32/common)
+
+    ## Libraries
+    set(ARCH_LIBS
+            "${TOOLCHAIN_PATH}/arm-miosix-eabi/lib/thumb/cm3/libc.a \
+            ${TOOLCHAIN_PATH}/arm-miosix-eabi/lib/thumb/cm3/libstdc++.a \
+            ${TOOLCHAIN_PATH}/lib/gcc/arm-miosix-eabi/4.7.3/thumb/cm3/libgcc.a")
 
     ##-------------------------------------------------------------------------
     ## BOARD: stm32f103ze_stm3210e-eval
@@ -721,8 +751,9 @@ elseif (${ARCH} STREQUAL cortexM3_stm32)
 
         ## Select linker script and boot file
         ## Their path must be relative to the miosix directory.
+
         set(BOOT_FILE ${KPATH}/${BOARD_INC}/core/stage_1_boot.cpp)
-        #LINKER_SCRIPT := already selected in board options
+        #LINKER_SCRIPT already selected in board options
 
         ## Select architecture specific files
         ## These are the files in arch/<arch name>/<board name>
@@ -758,8 +789,9 @@ elseif (${ARCH} STREQUAL cortexM3_stm32)
 
         ## Select linker script and boot file
         ## Their path must be relative to the miosix directory.
+
         set(BOOT_FILE ${KPATH}/${BOARD_INC}/core/stage_1_boot.cpp)
-        #LINKER_SCRIPT := already selected in board options
+        #LINKER_SCRIPT already selected in board options
 
         ## Select architecture specific files
         ## These are the files in arch/<arch name>/<board name>
@@ -798,6 +830,7 @@ elseif (${ARCH} STREQUAL cortexM3_stm32)
 
         ## Select linker script and boot file
         ## Their path must be relative to the miosix directory.
+
         set(BOOT_FILE ${KPATH}/${BOARD_INC}/core/stage_1_boot.cpp)
         set(LINKER_SCRIPT ${KPATH}/${BOARD_INC}/stm32_128k+8k_rom.ld)
 
@@ -835,6 +868,7 @@ elseif (${ARCH} STREQUAL cortexM3_stm32)
 
         ## Select linker script and boot file
         ## Their path must be relative to the miosix directory.
+
         set(BOOT_FILE ${KPATH}/${BOARD_INC}/core/stage_1_boot.)
         set(LINKER_SCRIPT ${KPATH}/${BOARD_INC}/stm32_256k+24k_rom.ld)
 
@@ -873,6 +907,7 @@ elseif (${ARCH} STREQUAL cortexM3_stm32)
 
         ## Select linker script and boot file
         ## Their path must be relative to the miosix directory.
+
         set(BOOT_FILE ${KPATH}/${BOARD_INC}/core/stage_1_boot.cpp)
         set(LINKER_SCRIPT ${KPATH}/${BOARD_INC}/stm32_512k+64k_rom.ld)
 
@@ -907,6 +942,7 @@ elseif (${ARCH} STREQUAL cortexM3_stm32)
 
         ## Select linker script and boot file
         ## Their path must be relative to the miosix directory.
+
         set(BOOT_FILE ${KPATH}/${BOARD_INC}/core/stage_1_boot.cpp)
         set(LINKER_SCRIPT ${KPATH}/${BOARD_INC}/stm32_512k+64k_rom.ld)
 
@@ -942,6 +978,7 @@ elseif (${ARCH} STREQUAL cortexM3_stm32)
 
         ## Select linker script and boot file
         ## Their path must be relative to the miosix directory.
+
         set(BOOT_FILE ${KPATH}/${BOARD_INC}/core/stage_1_boot.cpp)
         set(LINKER_SCRIPT ${KPATH}/${BOARD_INC}/stm32_128k+20k_rom.ld)
 
@@ -975,6 +1012,7 @@ elseif (${ARCH} STREQUAL cortexM3_stm32)
 
         ## Select linker script and boot file
         ## Their path must be relative to the miosix directory.
+
         set(BOOT_FILE ${KPATH}/${BOARD_INC}/core/stage_1_boot.cpp)
         set(LINKER_SCRIPT ${KPATH}/${BOARD_INC}/stm32_127k+8k_rom.ld)
 
@@ -1008,6 +1046,7 @@ elseif (${ARCH} STREQUAL cortexM3_stm32)
 
         ## Select linker script and boot file
         ## Their path must be relative to the miosix directory.
+
         set(BOOT_FILE ${KPATH}/${BOARD_INC}/core/stage_1_boot.cpp)
         set(LINKER_SCRIPT ${KPATH}/${BOARD_INC}/stm32_64k+20k_rom.ld)
 
@@ -1041,6 +1080,7 @@ elseif (${ARCH} STREQUAL cortexM3_stm32)
 
         ## Select linker script and boot file
         ## Their path must be relative to the miosix directory.
+
         set(BOOT_FILE ${KPATH}/${BOARD_INC}/core/stage_1_boot.cpp)
         set(LINKER_SCRIPT ${KPATH}/${BOARD_INC}/stm32_63k+8k_rom.ld)
 
@@ -1108,8 +1148,16 @@ elseif (${ARCH} STREQUAL cortexM3_stm32)
 ## ARCHITECTURE: cortexM4_stm32f4
 ##
 elseif (${ARCH} STREQUAL cortexM4_stm32f4)
+
     ## Base directory with else header files for this board
     set(ARCH_INC arch/cortexM4_stm32f4/common)
+
+    ## Libraries
+    set(ARCH_LIBS
+            "${TOOLCHAIN_PATH}/arm-miosix-eabi/lib/thumb/cm4/hardfp/fpv4/libc.a \
+            ${TOOLCHAIN_PATH}/arm-miosix-eabi/lib/thumb/cm4/hardfp/fpv4/libstdc++.a \
+            ${TOOLCHAIN_PATH}/arm-miosix-eabi/lib/thumb/cm4/hardfp/fpv4/libm.a \
+            ${TOOLCHAIN_PATH}/lib/gcc/arm-miosix-eabi/4.7.3/thumb/cm4/hardfp/fpv4/libgcc.a")
 
     ##-------------------------------------------------------------------------
     ## BOARD: stm32f407vg_stm32f4discovery
@@ -1121,8 +1169,9 @@ elseif (${ARCH} STREQUAL cortexM4_stm32f4)
 
         ## Select linker script and boot file
         ## Their path must be relative to the miosix directory.
+
         set(BOOT_FILE ${KPATH}/${BOARD_INC}/core/stage_1_boot.cpp)
-        #LINKER_SCRIPT := already selected in board options
+        #LINKER_SCRIPT already selected in board options
 
         ## Select architecture specific files
         ## These are the files in arch/<arch name>/<board name>
@@ -1156,6 +1205,7 @@ elseif (${ARCH} STREQUAL cortexM4_stm32f4)
 
         ## Select linker script and boot file
         ## Their path must be relative to the miosix directory.
+
         set(BOOT_FILE ${KPATH}/${BOARD_INC}/core/stage_1_boot.cpp)
         set(LINKER_SCRIPT ${KPATH}/${BOARD_INC}/stm32_1m+192k_rom.ld)
 
@@ -1192,8 +1242,9 @@ elseif (${ARCH} STREQUAL cortexM4_stm32f4)
 
         ## Select linker script and boot file
         ## Their path must be relative to the miosix directory.
+
         set(BOOT_FILE ${KPATH}/${BOARD_INC}/core/stage_1_boot.cpp)
-        #LINKER_SCRIPT := already selected in board options
+        #LINKER_SCRIPT already selected in board options
 
         ## Select architecture specific files
         ## These are the files in arch/<arch name>/<board name>
@@ -1226,8 +1277,9 @@ elseif (${ARCH} STREQUAL cortexM4_stm32f4)
 
         ## Select linker script and boot file
         ## Their path must be relative to the miosix directory.
+
         set(BOOT_FILE ${KPATH}/${BOARD_INC}/core/stage_1_boot.cpp)
-        #LINKER_SCRIPT := already selected in board options
+        #LINKER_SCRIPT already selected in board options
 
         ## Select architecture specific files
         ## These are the files in arch/<arch name>/<board name>
@@ -1259,6 +1311,7 @@ elseif (${ARCH} STREQUAL cortexM4_stm32f4)
 
         ## Select linker script and boot file
         ## Their path must be relative to the miosix directory.
+
         set(BOOT_FILE ${KPATH}/${BOARD_INC}/core/stage_1_boot.cpp)
         set(LINKER_SCRIPT ${KPATH}/${BOARD_INC}/stm32_512k+128k_rom.ld)
 
@@ -1289,8 +1342,9 @@ elseif (${ARCH} STREQUAL cortexM4_stm32f4)
 
         ## Select linker script and boot file
         ## Their path must be relative to the miosix directory.
+
         set(BOOT_FILE ${KPATH}/${BOARD_INC}/core/stage_1_boot.cpp)
-        #LINKER_SCRIPT := already selected in board options
+        #LINKER_SCRIPT already selected in board options
 
         ## Select architecture specific files
         ## These are the files in arch/<arch name>/<board name>
@@ -1325,6 +1379,7 @@ elseif (${ARCH} STREQUAL cortexM4_stm32f4)
 
         ## Select linker script and boot file
         ## Their path must be relative to the miosix directory.
+
         set(BOOT_FILE ${KPATH}/${BOARD_INC}/core/stage_1_boot.cpp)
         set(LINKER_SCRIPT ${KPATH}/${BOARD_INC}/stm32_256k+64k_rom.ld)
 
@@ -1361,8 +1416,9 @@ elseif (${ARCH} STREQUAL cortexM4_stm32f4)
 
         ## Select linker script and boot file
         ## Their path must be relative to the miosix directory.
+
         set(BOOT_FILE ${KPATH}/${BOARD_INC}/core/stage_1_boot.cpp)
-        #LINKER_SCRIPT := already selected in board options
+        #LINKER_SCRIPT already selected in board options
 
         ## Select architecture specific files
         ## These are the files in arch/<arch name>/<board name>
@@ -1395,8 +1451,9 @@ elseif (${ARCH} STREQUAL cortexM4_stm32f4)
 
         ## Select linker script and boot file
         ## Their path must be relative to the miosix directory.
+
         set(BOOT_FILE ${KPATH}/${BOARD_INC}/core/stage_1_boot.cpp)
-        #LINKER_SCRIPT := already selected in board options
+        #LINKER_SCRIPT already selected in board options
 
         ## Select architecture specific files
         ## These are the files in arch/<arch name>/<board name>
@@ -1431,6 +1488,7 @@ elseif (${ARCH} STREQUAL cortexM4_stm32f4)
 
         ## Select linker script and boot file
         ## Their path must be relative to the miosix directory.
+
         set(BOOT_FILE ${KPATH}/${BOARD_INC}/core/stage_1_boot.cpp)
         set(LINKER_SCRIPT ${KPATH}/${BOARD_INC}/stm32_512k+96k_rom.ld)
 
@@ -1464,6 +1522,7 @@ elseif (${ARCH} STREQUAL cortexM4_stm32f4)
 
         ## Select linker script and boot file
         ## Their path must be relative to the miosix directory.
+
         set(BOOT_FILE ${KPATH}/${BOARD_INC}/core/stage_1_boot.cpp)
         set(LINKER_SCRIPT ${KPATH}/${BOARD_INC}/stm32_1m+192k_rom.ld)
 
@@ -1544,8 +1603,9 @@ elseif (${ARCH} STREQUAL cortexM4_stm32f4)
 
             ## Select linker script and boot file
             ## Their path must be relative to the miosix directory.
+
             set(BOOT_FILE ${KPATH}/${BOARD_INC}/core/stage_1_boot.cpp)
-            #LINKER_SCRIPT := already selected in board options
+            #LINKER_SCRIPT already selected in board options
 
             ## Select architecture specific files
             ## These are the files in arch/<arch name>/<board name>
@@ -1585,8 +1645,9 @@ elseif (${ARCH} STREQUAL cortexM4_stm32f4)
 
             ## Select linker script and boot file
             ## Their path must be relative to the miosix directory.
+
             set(BOOT_FILE ${KPATH}/${BOARD_INC}/core/stage_1_boot.cpp)
-            #LINKER_SCRIPT := already selected in board options
+            #LINKER_SCRIPT already selected in board options
 
             ## Select architecture specific files
             ## These are the files in arch/<arch name>/<board name>
@@ -1629,6 +1690,7 @@ elseif (${ARCH} STREQUAL cortexM4_stm32f4)
 
             ## Select linker script and boot file
             ## Their path must be relative to the miosix directory.
+
             set(BOOT_FILE ${KPATH}/${BOARD_INC}/core/stage_1_boot.cpp)
             set(LINKER_SCRIPT ${KPATH}/${BOARD_INC}/stm32_1m+128k_rom.ld)
 
@@ -1668,6 +1730,7 @@ elseif (${ARCH} STREQUAL cortexM4_stm32f4)
 
             ## Select linker script and boot file
             ## Their path must be relative to the miosix directory.
+
             set(BOOT_FILE ${KPATH}/${BOARD_INC}/core/stage_1_boot.cpp)
             set(LINKER_SCRIPT ${KPATH}/${BOARD_INC}/stm32_1M+128k_rom.ld)
 
@@ -1708,6 +1771,7 @@ elseif (${ARCH} STREQUAL cortexM4_stm32f4)
 
             ## Select linker script and boot file
             ## Their path must be relative to the miosix directory.
+
             set(BOOT_FILE ${KPATH}/${BOARD_INC}/core/stage_1_boot.cpp)
             set(LINKER_SCRIPT ${KPATH}/${BOARD_INC}/stm32_512k+128k_rom.ld)
 
@@ -1736,6 +1800,7 @@ elseif (${ARCH} STREQUAL cortexM4_stm32f4)
 
             ## Select linker script and boot file
             ## Their path must be relative to the miosix directory.
+
             set(BOOT_FILE ${KPATH}/${BOARD_INC}/core/stage_1_boot.cpp)
             set(LINKER_SCRIPT ${KPATH}/${BOARD_INC}/stm32_1m+128k_rom.ld)
 
@@ -1807,8 +1872,15 @@ elseif (${ARCH} STREQUAL cortexM4_stm32f4)
 ## ARCHITECTURE: cortexM3_stm32l1
 ##
 elseif (${ARCH} STREQUAL cortexM3_stm32l1)
+
     ## Base directory with else header files for this board
     set(ARCH_INC arch/cortexM3_stm32l1/common)
+
+    ## Libraries
+    set(ARCH_LIBS
+            "${TOOLCHAIN_PATH}/arm-miosix-eabi/lib/thumb/cm3/libc.a \
+            ${TOOLCHAIN_PATH}/arm-miosix-eabi/lib/thumb/cm3/libstdc++.a \
+            ${TOOLCHAIN_PATH}/lib/gcc/arm-miosix-eabi/4.7.3/thumb/cm3/libgcc.a")
 
     ##-------------------------------------------------------------------------
     ## BOARD: stm32l151c8_als_mainboard
@@ -1820,6 +1892,7 @@ elseif (${ARCH} STREQUAL cortexM3_stm32l1)
 
         ## Select linker script and boot file
         ## Their path must be relative to the miosix directory.
+
         set(BOOT_FILE ${KPATH}/${BOARD_INC}/core/stage_1_boot.cpp)
         set(LINKER_SCRIPT ${KPATH}/${BOARD_INC}/stm32_64k+10k_rom.ld)
 
@@ -1887,6 +1960,12 @@ elseif (${ARCH} STREQUAL cortexM3_efm32gg)
     ## Base directory with else header files for this board
     set(ARCH_INC arch/cortexM3_efm32gg/common)
 
+    ## Libraries
+    set(ARCH_LIBS
+            "${TOOLCHAIN_PATH}/arm-miosix-eabi/lib/thumb/cm3/libc.a \
+            ${TOOLCHAIN_PATH}/arm-miosix-eabi/lib/thumb/cm3/libstdc++.a \
+            ${TOOLCHAIN_PATH}/lib/gcc/arm-miosix-eabi/4.7.3/thumb/cm3/libgcc.a")
+
     ##-------------------------------------------------------------------------
     ## BOARD: efm32gg332f1024_wandstem
     ##
@@ -1897,6 +1976,7 @@ elseif (${ARCH} STREQUAL cortexM3_efm32gg)
 
         ## Select linker script and boot file
         ## Their path must be relative to the miosix directory.
+
         set(BOOT_FILE ${KPATH}/${BOARD_INC}/core/stage_1_boot.cpp)
         set(LINKER_SCRIPT ${KPATH}/${BOARD_INC}/efm32_1M+128k_rom_usbbootloader.ld)
 
@@ -1971,6 +2051,12 @@ elseif (${ARCH} STREQUAL cortexM7_stm32f7)
     ## Base directory with else header files for this board
     set(ARCH_INC arch/cortexM7_stm32f7/common)
 
+    # Libraries
+    set(ARCH_LIBS
+            "${TOOLCHAIN_PATH}/arm-miosix-eabi/lib/libc.a \
+            ${TOOLCHAIN_PATH}/arm-miosix-eabi/lib/libstdc++.a \
+            ${TOOLCHAIN_PATH}/lib/gcc/arm-miosix-eabi/4.7.3/libgcc.a")
+
     ##-------------------------------------------------------------------------
     ## BOARD: stm32f746zg_nucleo
     ##
@@ -1981,6 +2067,7 @@ elseif (${ARCH} STREQUAL cortexM7_stm32f7)
 
         ## Select linker script and boot file
         ## Their path must be relative to the miosix directory.
+
         set(BOOT_FILE ${KPATH}/${BOARD_INC}/core/stage_1_boot.cpp)
         set(LINKER_SCRIPT ${KPATH}/${BOARD_INC}/stm32_1024k+256k_rom.ld)
 
@@ -2058,6 +2145,12 @@ elseif (${ARCH} STREQUAL cortexM7_stm32h7)
     ## Base directory with else header files for this board
     set(ARCH_INC arch/cortexM7_stm32h7/common)
 
+    # Libraries
+    set(ARCH_LIBS
+            "${TOOLCHAIN_PATH}/arm-miosix-eabi/lib/libc.a \
+            ${TOOLCHAIN_PATH}/arm-miosix-eabi/lib/libstdc++.a \
+            ${TOOLCHAIN_PATH}/lib/gcc/arm-miosix-eabi/4.7.3/libgcc.a")
+
     ##-------------------------------------------------------------------------
     ## BOARD: stm32h753xi_eval
     ##
@@ -2068,8 +2161,9 @@ elseif (${ARCH} STREQUAL cortexM7_stm32h7)
 
         ## Select linker script and boot file
         ## Their path must be relative to the miosix directory.
+
         set(BOOT_FILE ${KPATH}/${BOARD_INC}/core/stage_1_boot.cpp)
-        #LINKER_SCRIPT := already selected in board options
+        #LINKER_SCRIPT already selected in board options
 
         ## Select architecture specific files
         ## These are the files in arch/<arch name>/<board name>
@@ -2117,6 +2211,7 @@ elseif (${ARCH} STREQUAL cortexM7_stm32h7)
     ## TODO: when upgrading compiler, add native cortex M7 support.
     ## For now we'll fallback to M4 which is compatible, but does not support
     ## double precision HW floating point
+
     set(AFLAGS_BASE -mcpu=cortex-m4 -mthumb -mfloat-abi=hard -mfpu=fpv4-sp-d16)
     set(CFLAGS_BASE "${CFLAGS_BASE} -D_ARCH_CORTEXM7_STM32H7 ${CLOCK_FREQ} ${XRAM} ${SRAM_BOOT} -mcpu=cortex-m4 -mthumb -mfloat-abi=hard -mfpu=fpv4-sp-d16 ${OPT_OPTIMIZATION} -c")
     set(CXXFLAGS_BASE "${CXXFLAGS_BASE} -D_ARCH_CORTEXM7_STM32H7 ${CLOCK_FREQ} ${XRAM} ${SRAM_BOOT} -mcpu=cortex-m4 -mthumb -mfloat-abi=hard -mfpu=fpv4-sp-d16 ${OPT_EXCEPT} ${OPT_OPTIMIZATION} -c")

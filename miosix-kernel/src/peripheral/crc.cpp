@@ -9,5 +9,8 @@ void Crc::init() {
 
         // Enable the clock
         RCC->AHB1ENR |= RCC_AHB1ENR_CRCEN;
+
+        // Reset the peripheral
+        CRC->CR = CRC_CR_RESET;
     }
 }

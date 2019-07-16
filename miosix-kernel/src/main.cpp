@@ -83,35 +83,17 @@ int nnRun(const ai_float *input, const ai_float *output, ai_u16 batchSize);
 // FFT
 #define FFT_SIZE 1024
 static FFT_F32_t FFT;
-//static float fftInput[FFT_SIZE * 2];
-//static float fftOutput[FFT_SIZE];
+static float fftInput[FFT_SIZE * 2];
+static float fftOutput[FFT_SIZE];
 static HannWindow hann(FFT_SIZE);
 
 
 // Neural network
 static ai_handle network = AI_HANDLE_NULL;
+static ai_u8 nn_activations[AI_NETWORK_DATA_ACTIVATIONS_SIZE];
 
 
 int main() {
-    {
-        RCC->AHB1ENR |= RCC_AHB1ENR_CRCEN;
-        RCC_SYNC();
-        CRC->CR = CRC_CR_RESET;
-    }
-
-    // Neural network setup
-    printf("Reachable\n");
-    ai_network_create(&network, (ai_buffer*) AI_NETWORK_DATA_CONFIG);
-    printf("Not reachable\n");
-
-    while (true) {
-
-    }
-}
-
-
-
-int mainOld() {
     // Peripherals setup
     Microphone& microphone = Microphone::getInstance();
     Crc::init();
@@ -119,7 +101,7 @@ int mainOld() {
 
     // FFT structure setup
     FFT_Init_F32(&FFT, FFT_SIZE, 0);
-    //FFT_SetBuffers_F32(&FFT, fftInput, fftOutput);
+    FFT_SetBuffers_F32(&FFT, fftInput, fftOutput);
 
     RCC->AHB1ENR |= RCC_AHB1ENR_CRCEN;
     CRC->CR = CRC_CR_RESET;
@@ -133,7 +115,6 @@ int mainOld() {
         while(true);
     }
 
-    /*
     const ai_network_params networkParams = AI_NETWORK_PARAMS_INIT(
             AI_NETWORK_DATA_WEIGHTS(ai_network_data_weights_get()),
             AI_NETWORK_DATA_ACTIVATIONS(nn_activations)
@@ -144,7 +125,7 @@ int mainOld() {
         printf("AI initialization error - type = %lu, code = %lu\n", error.type, error.code);
         while(true);
     }
-    */
+
 
     while (true) {
         // Start the recording on user button press
