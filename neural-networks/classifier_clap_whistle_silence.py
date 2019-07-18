@@ -1,6 +1,6 @@
-from keras.models import Sequential
-from keras.layers import Dense
-from keras.utils import to_categorical
+from tensorflow.python.keras.models import Sequential
+from tensorflow.python.keras.layers import Dense
+from tensorflow.python.keras.utils import to_categorical
 import numpy as np
 
 from enum import Enum
