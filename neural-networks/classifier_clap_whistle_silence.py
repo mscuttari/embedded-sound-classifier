@@ -14,32 +14,39 @@ np.random.seed(7)
 # load dataset
 dataset = np.loadtxt("clap_whistle_silence_data.csv", delimiter=';')
 
+# shuffle dataset for independent results
+np.random.shuffle(dataset)
+
+# prepare dataset for training
 x_samples = dataset[:, 0:512]  # fft data
 enumerate_samples = dataset[:, 512]    # class
 
-y_samples = to_categorical(enumerate_samples, num_classes=3)
+y_samples = to_categorical(enumerate_samples, num_classes=3) # transform enum in cathegorical data -> one-hot cod.
 
+#model
 model = Sequential()
 model.add(Dense(8, input_dim=512, activation='relu'))
-model.add(Dense(5, activation='relu'))
-model.add(Dense(3, activation='softmax'))
+model.add(Dense(5, activation='relu'))      # may be commented for smaller net
+model.add(Dense(3, activation='softmax'))   # softmax -> classificator
+#end model
 
 model.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['accuracy'])
 
+# training
 model.fit(x_samples, y_samples, epochs=50, batch_size=10)
 
-scores = model.evaluate(x_samples, y_samples)
-
+# evaluate the network with the samples used for training
+scores = model.evaluate(x_samples, y_samples)   # optimistic metrics
 print("\n%s: %.2f%%" % (model.metrics_names[1], scores[1]*100))
 
+# evaluate the network with test samples unused for training
 testset = np.loadtxt("test_cws.csv", delimiter=';')
 x_test = dataset[:, 0:512]
 y_test = to_categorical(dataset[:,512], num_classes=3)
-scores = model.evaluate(x_test, y_test)
-
+scores = model.evaluate(x_test, y_test)     # real metrics
 print("\n%s: %.2f%%" % (model.metrics_names[1], scores[1]*100))
 
-x = x_samples[-8:]
-
+# save weights and description of the NN in a file
+# model.h to be compiled in Cube.ai
 model.save("model.h")
 
