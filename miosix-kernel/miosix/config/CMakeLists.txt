@@ -51,8 +51,8 @@ set(OPT_BOARD stm32f407vg_stm32f4discovery)
 ## -O2 is recomended otherwise, as it provides a good balance between code
 ## size and speed
 ##
-set(OPT_OPTIMIZATION -O0)
-#set(OPT_OPTIMIZATION -O2)
+#set(OPT_OPTIMIZATION -O0)
+set(OPT_OPTIMIZATION -O2)
 #set(OPT_OPTIMIZATION -O3)
 #set(OPT_OPTIMIZATION -Os)
 

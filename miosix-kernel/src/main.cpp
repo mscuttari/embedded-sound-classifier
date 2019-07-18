@@ -6,7 +6,6 @@
 #include "fft/window.h"
 #include "neural-network/network.h"
 #include "neural-network/network_data.h"
-#include "neural-network/app_x-cube-ai.h"
 #include "peripheral/button.h"
 #include "peripheral/microphone.h"
 #include "peripheral/crc.h"
@@ -25,14 +24,6 @@ using namespace miosix;
  * Configure stdout in RAW mode
  */
 void setRawStdout();
-
-
-/**
- * Write to the serial port
- *
- * @param str   text to be sent
- */
-void print(const char* str);
 
 
 /**
@@ -70,10 +61,7 @@ float normalize(T value, bool sign);
 
 // FFT
 #define FFT_SIZE 1024
-static FFT_F32_t FFT;
-static float fftInput[FFT_SIZE * 2];
-static float fftOutput[FFT_SIZE];
-static HannWindow hann(FFT_SIZE);
+FFT fft(FFT_SIZE);
 
 
 // Neural network
@@ -81,7 +69,10 @@ static ai_handle network = AI_HANDLE_NULL;
 static ai_u8 nn_activations[AI_NETWORK_DATA_ACTIVATIONS_SIZE];
 static ai_buffer nn_input[AI_NETWORK_IN_NUM] = { AI_NETWORK_IN_1 };
 static ai_buffer nn_output[AI_NETWORK_OUT_NUM] = { AI_NETWORK_OUT_1 };
-static ai_float nn_outData[AI_MNETWORK_OUT_1_SIZE];
+static ai_float nn_outData[AI_NETWORK_OUT_1_SIZE];
+
+typedef enum {NONE, SILENCE, WHISTLE, CLAP} state_t;
+static state_t state;
 
 
 int main() {
@@ -90,26 +81,14 @@ int main() {
     Crc::init();
     setRawStdout();
 
-    // FFT structure setup
-    FFT_Init_F32(&FFT, FFT_SIZE, 0);
-    FFT_SetBuffers_F32(&FFT, fftInput, fftOutput);
-
     // Neural network setup
     ai_error aiError = ai_network_create(&network, (ai_buffer*) AI_NETWORK_DATA_CONFIG);
 
-    if (aiError.type != AI_ERROR_NONE) {
-        printf("Network creation error - type = %lu, code = %lu\r\n", aiError.type, aiError.code);
-        while(true);
-
+    if (aiError.type == AI_ERROR_NONE) {
+        printf("Neural network created\r\n");
     } else {
-        ai_network_report report;
-        ai_bool res = ai_network_get_info(network, &report);
-
-        if (res) {
-            printf("Network creation successful\r\n");
-            printf("MACC: %lu\r\n", report.n_macc);
-            printf("Nodes: %lu\r\n", report.n_nodes);
-        }
+        printf("Neural network creation error - type = %lu, code = %lu\r\n", aiError.type, aiError.code);
+        while(true);
     }
 
     const ai_network_params networkParams = AI_NETWORK_PARAMS_INIT(
@@ -117,25 +96,26 @@ int main() {
             AI_NETWORK_DATA_ACTIVATIONS(nn_activations)
     );
 
-    if (!ai_network_init(network, &networkParams)) {
-        ai_error error = ai_network_get_error(network);
-        printf("Network initialization error - type = %lu, code = %lu\r\n", error.type, error.code);
-        while(true);
+    if (ai_network_init(network, &networkParams)) {
+        printf("Neural network initialized\r\n");
     } else {
-        printf("Network initialized\r\n");
+        ai_error error = ai_network_get_error(network);
+        printf("Neural network initialization error - type = %lu, code = %lu\r\n", error.type, error.code);
+        while(true);
     }
 
     nn_input[0].n_batches = 1;
-    nn_input[0].data = AI_HANDLE_PTR(fftOutput);
+    nn_input[0].data = AI_HANDLE_PTR(fft.getBins());
     nn_output[0].n_batches = 1;
     nn_output[0].data = AI_HANDLE_PTR(nn_outData);
 
-
+    // Main loop
     while (true) {
         // Start the recording on user button press
         UserButton::wait();
+        state = NONE;
         sendStartSignal();
-        microphone.start(bind(scanAudio, placeholders::_1, placeholders::_2), FFT_SIZE);
+        microphone.start(bind(scanAudio, placeholders::_1, placeholders::_2), fft.getSize());
 
         // Stop on second button press
         UserButton::wait();
@@ -153,13 +133,8 @@ void setRawStdout() {
 }
 
 
-void print(const char *str) {
-    write(STDOUT_FILENO, str, strlen(str));
-}
-
-
 void sendStartSignal() {
-    print("#start\n");
+    printf("#start\r\n");
 
     #ifdef TRAINING
         int value = FFT_SIZE / 2 * sizeof(float);
@@ -173,24 +148,26 @@ void sendStopSignal() {
         int value = 0;
         write(STDOUT_FILENO, &value, sizeof(int));
     #else
-        print("#stop\n");
+        printf("#stop\r\n");
     #endif
 }
 
 
 void scanAudio(short* data, unsigned int n) {
+    static HannWindow hann(FFT_SIZE);
+
     for (unsigned int i = 0; i < n; i++) {
         float value = normalize<short>(data[i], true);
         value = hann.apply(value, i);
-        FFT_AddToBuffer(&FFT, value);
+        fft.addSample(value);;
     }
 
     // If the data is not enough, fill with zeros
-    for (int i = n; i < FFT_SIZE; i++) {
-        FFT_AddToBuffer(&FFT, 0);
+    for (int i = n; i < fft.getSize(); i++) {
+        fft.addSample(0);
     }
 
-    FFT_Process_F32(&FFT);
+    fft.process();
 
     #ifdef TRAINING
         int s = FFT_SIZE / 2 * sizeof(float);
@@ -200,11 +177,21 @@ void scanAudio(short* data, unsigned int n) {
         ai_network_run(network, &nn_input[0], &nn_output[0]);
 
         if (nn_outData[0] > nn_outData[1] && nn_outData[0] > nn_outData[2]) {
-            printf("Silenzio\r\n");
+            if (state != SILENCE) {
+                state = SILENCE;
+            }
+
         } else if (nn_outData[1] > nn_outData[0] && nn_outData[1] > nn_outData[2]) {
-            printf("Fischio\r\n");
+            if (state != WHISTLE) {
+                state = WHISTLE;
+                printf("Whistle\r\n");
+            }
+
         } else {
-            printf("Mani\r\n");
+            if (state != CLAP) {
+                state = CLAP;
+                printf("Clap\r\n");
+            }
         }
     #endif
 }
@@ -219,14 +206,14 @@ float normalize(T value, bool sign) {
 
     // Set all the bits to 1
     for (unsigned int i = 0; i < sizeof(T); i++) {
-        for (int j = 0; j < 8; j++) {
-            *((char*) normalizationFactor + i) |= 1 << j;
+        for (unsigned int j = 0; j < 8; j++) {
+            *((char*) normalizationFactor + i) |= 1u << j;
         }
     }
 
     // Set the first bit to 0 in case of signed type
     if (sign) {
-        *normalizationFactor &= ~(1ULL << (8 * sizeof(T) - 1));
+        *normalizationFactor &= ~(1ull << (8 * sizeof(T) - 1));
     }
 
     // Normalize

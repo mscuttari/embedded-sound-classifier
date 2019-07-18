@@ -53,7 +53,7 @@ file(GLOB TOOLCHAIN_PATH ${TOOLCHAIN_PATH})
 ## Kernel
 if (NOT DEFINED KPATH)
     message(WARNING "Kernel path not set")
-elseif(NOT EXISTS ${KPATH})
+elseif(NOT EXISTS ${PROJECT_SOURCE_DIR}/${KPATH})
     message(FATAL_ERROR "Kernel not found at path \"${KPATH}\"")
 endif()
 
