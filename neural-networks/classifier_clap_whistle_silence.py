@@ -48,6 +48,12 @@ print("\n%s: %.2f%%" % (model.metrics_names[1], scores[1]*100))
 
 # save weights and description of the NN in a file
 # model.h to be compiled in Cube.ai
-model.save("model.h5", True, True)  # first True to overwrite file if existing
+#model.save("model.h5", True, True)  # first True to overwrite file if existing
                                     # second True to not save optimizer
 
+#model.save_weights("weights.h5")
+
+model_json = model.to_json()
+with open("model.json", "w") as json_file:
+    json_file.write(model_json)
+model.save_weights("weights_2.h5")
