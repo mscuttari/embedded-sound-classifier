@@ -25,9 +25,9 @@ y_samples = to_categorical(enumerate_samples, num_classes=3) # transform enum in
 
 #model
 model = Sequential()
-model.add(Dense(8, input_dim=512, activation='relu'))
-model.add(Dense(5, activation='relu'))      # may be commented for smaller net
-model.add(Dense(3, activation='softmax'))   # softmax -> classificator
+model.add(Dense(10, input_dim=512, activation='relu', kernel_initializer='random_uniform')) # kernel_init because CUbe.ai does not recognize GlorotUniform distribution
+#model.add(Dense(5, activation='relu'))      # may be commented for smaller net
+model.add(Dense(3, activation='softmax', kernel_initializer='random_uniform'))   # softmax -> classificator
 #end model
 
 model.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['accuracy'])
@@ -48,5 +48,6 @@ print("\n%s: %.2f%%" % (model.metrics_names[1], scores[1]*100))
 
 # save weights and description of the NN in a file
 # model.h to be compiled in Cube.ai
-model.save("model.h")
+model.save("model.h5", True, True)  # first True to overwrite file if existing
+                                    # second True to not save optimizer
 
