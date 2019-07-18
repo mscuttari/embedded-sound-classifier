@@ -68,17 +68,6 @@ template<typename T>
 float normalize(T value, bool sign);
 
 
-/**
- * Feed the neural network
- *
- * @param input         input buffer
- * @param output        output buffer
- *
- * @return number of input tensors processed
- */
-int nnRun(const ai_float *input, const ai_float *output);
-
-
 // FFT
 #define FFT_SIZE 1024
 static FFT_F32_t FFT;
@@ -92,6 +81,7 @@ static ai_handle network = AI_HANDLE_NULL;
 static ai_u8 nn_activations[AI_NETWORK_DATA_ACTIVATIONS_SIZE];
 static ai_buffer nn_input[AI_NETWORK_IN_NUM] = { AI_NETWORK_IN_1 };
 static ai_buffer nn_output[AI_NETWORK_OUT_NUM] = { AI_NETWORK_OUT_1 };
+static ai_float nn_outData[AI_MNETWORK_OUT_1_SIZE];
 
 
 int main() {
@@ -128,12 +118,17 @@ int main() {
     );
 
     if (!ai_network_init(network, &networkParams)) {
-        ai_error error = ai_network_get_error(&network);
+        ai_error error = ai_network_get_error(network);
         printf("Network initialization error - type = %lu, code = %lu\r\n", error.type, error.code);
         while(true);
     } else {
         printf("Network initialized\r\n");
     }
+
+    nn_input[0].n_batches = 1;
+    nn_input[0].data = AI_HANDLE_PTR(fftOutput);
+    nn_output[0].n_batches = 1;
+    nn_output[0].data = AI_HANDLE_PTR(nn_outData);
 
 
     while (true) {
@@ -202,11 +197,15 @@ void scanAudio(short* data, unsigned int n) {
         write(STDOUT_FILENO, &s, sizeof(int));
         write(STDOUT_FILENO, fftOutput, s);
     #else
-        ai_float output[3];
-        nnRun(fftOutput, output);
-        static float counter = 0;
-        counter += output[0] + output[1] + output[2];
-        printf("%.6f\r\n", counter);
+        ai_network_run(network, &nn_input[0], &nn_output[0]);
+
+        if (nn_outData[0] > nn_outData[1] && nn_outData[0] > nn_outData[2]) {
+            printf("Silenzio\r\n");
+        } else if (nn_outData[1] > nn_outData[0] && nn_outData[1] > nn_outData[2]) {
+            printf("Fischio\r\n");
+        } else {
+            printf("Mani\r\n");
+        }
     #endif
 }
 
@@ -235,15 +234,4 @@ float normalize(T value, bool sign) {
 
     free(normalizationFactor);
     return result;
-}
-
-
-int nnRun(const ai_float *input, const ai_float *output) {
-    nn_input[0].n_batches = 1;
-    nn_input[0].data = AI_HANDLE_PTR(input);
-
-    nn_output[0].n_batches = 1;
-    nn_output[0].data = AI_HANDLE_PTR(output);
-
-    return ai_network_run(&network, &nn_input[0], &nn_output[0]);
 }
