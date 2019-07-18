@@ -73,11 +73,10 @@ float normalize(T value, bool sign);
  *
  * @param input         input buffer
  * @param output        output buffer
- * @param batchSize     batch size
  *
  * @return number of input tensors processed
  */
-int nnRun(const ai_float *input, const ai_float *output, ai_u16 batchSize);
+int nnRun(const ai_float *input, const ai_float *output);
 
 
 // FFT
@@ -91,6 +90,8 @@ static HannWindow hann(FFT_SIZE);
 // Neural network
 static ai_handle network = AI_HANDLE_NULL;
 static ai_u8 nn_activations[AI_NETWORK_DATA_ACTIVATIONS_SIZE];
+static ai_buffer nn_input[AI_NETWORK_IN_NUM] = { AI_NETWORK_IN_1 };
+static ai_buffer nn_output[AI_NETWORK_OUT_NUM] = { AI_NETWORK_OUT_1 };
 
 
 int main() {
@@ -103,16 +104,22 @@ int main() {
     FFT_Init_F32(&FFT, FFT_SIZE, 0);
     FFT_SetBuffers_F32(&FFT, fftInput, fftOutput);
 
-    RCC->AHB1ENR |= RCC_AHB1ENR_CRCEN;
-    CRC->CR = CRC_CR_RESET;
-
     // Neural network setup
     ai_error aiError = ai_network_create(&network, (ai_buffer*) AI_NETWORK_DATA_CONFIG);
 
     if (aiError.type != AI_ERROR_NONE) {
-        // An error happened during the creation of the neural network
-        printf("AI creation error - type = %lu, code = %lu\n", aiError.type, aiError.code);
+        printf("Network creation error - type = %lu, code = %lu\r\n", aiError.type, aiError.code);
         while(true);
+
+    } else {
+        ai_network_report report;
+        ai_bool res = ai_network_get_info(network, &report);
+
+        if (res) {
+            printf("Network creation successful\r\n");
+            printf("MACC: %lu\r\n", report.n_macc);
+            printf("Nodes: %lu\r\n", report.n_nodes);
+        }
     }
 
     const ai_network_params networkParams = AI_NETWORK_PARAMS_INIT(
@@ -120,10 +127,12 @@ int main() {
             AI_NETWORK_DATA_ACTIVATIONS(nn_activations)
     );
 
-    if (!ai_network_init(&network, &networkParams)) {
+    if (!ai_network_init(network, &networkParams)) {
         ai_error error = ai_network_get_error(&network);
-        printf("AI initialization error - type = %lu, code = %lu\n", error.type, error.code);
+        printf("Network initialization error - type = %lu, code = %lu\r\n", error.type, error.code);
         while(true);
+    } else {
+        printf("Network initialized\r\n");
     }
 
 
@@ -181,6 +190,7 @@ void scanAudio(short* data, unsigned int n) {
         FFT_AddToBuffer(&FFT, value);
     }
 
+    // If the data is not enough, fill with zeros
     for (int i = n; i < FFT_SIZE; i++) {
         FFT_AddToBuffer(&FFT, 0);
     }
@@ -190,9 +200,13 @@ void scanAudio(short* data, unsigned int n) {
     #ifdef TRAINING
         int s = FFT_SIZE / 2 * sizeof(float);
         write(STDOUT_FILENO, &s, sizeof(int));
-        //write(STDOUT_FILENO, fftOutput, s);
+        write(STDOUT_FILENO, fftOutput, s);
     #else
-
+        ai_float output[3];
+        nnRun(fftOutput, output);
+        static float counter = 0;
+        counter += output[0] + output[1] + output[2];
+        printf("%.6f\r\n", counter);
     #endif
 }
 
@@ -224,14 +238,12 @@ float normalize(T value, bool sign) {
 }
 
 
-int nnRun(const ai_float *input, const ai_float *output, const ai_u16 batchSize) {
-    /*
-    nnInput[0].n_batches = batchSize;
-    nnInput[0].data = AI_HANDLE_PTR(input);
-    nnOutput[0].n_batches = batchSize;
-    nnOutput[0].data = AI_HANDLE_PTR(output);
+int nnRun(const ai_float *input, const ai_float *output) {
+    nn_input[0].n_batches = 1;
+    nn_input[0].data = AI_HANDLE_PTR(input);
 
-    return ai_network_run(&network, &nnInput[0], &nnOutput[0]);
-     */
-    return 1;
+    nn_output[0].n_batches = 1;
+    nn_output[0].data = AI_HANDLE_PTR(output);
+
+    return ai_network_run(&network, &nn_input[0], &nn_output[0]);
 }
