@@ -611,6 +611,11 @@ ifeq ($(ARCH),arm7_lpc2000)
     ## Base directory with header files for this board
     ARCH_INC := arch/arm7_lpc2000/common
 
+    ## Libraries
+    ARCH_LIBS := $(ARM_MIOSIX_EABI)/arm-miosix-eabi/lib/libc.a \
+                 $(ARM_MIOSIX_EABI)/arm-miosix-eabi/lib/libstdc++.a \
+                 $(ARM_MIOSIX_EABI)/lib/gcc/arm-miosix-eabi/4.7.3/libgcc.a
+
     ##-------------------------------------------------------------------------
     ## BOARD: lpc2138_miosix_board
     ##
@@ -681,6 +686,11 @@ ifeq ($(ARCH),arm7_lpc2000)
 else ifeq ($(ARCH),cortexM3_stm32)
     ## Base directory with header files for this board
     ARCH_INC := arch/cortexM3_stm32/common
+
+    ## Libraries
+    ARCH_LIBS := $(ARM_MIOSIX_EABI)/arm-miosix-eabi/lib/thumb/cm3/libc.a \
+                 $(ARM_MIOSIX_EABI)/arm-miosix-eabi/lib/thumb/cm3/libstdc++.a \
+                 $(ARM_MIOSIX_EABI)/lib/gcc/arm-miosix-eabi/4.7.3/thumb/cm3/libgcc.a
 
     ##-------------------------------------------------------------------------
     ## BOARD: stm32f103ze_stm3210e-eval
@@ -1078,6 +1088,12 @@ else ifeq ($(ARCH),cortexM3_stm32)
 else ifeq ($(ARCH),cortexM4_stm32f4)
     ## Base directory with else header files for this board
     ARCH_INC := arch/cortexM4_stm32f4/common
+
+    ## Libraries
+    ARCH_LIBS := $(ARM_MIOSIX_EABI)/arm-miosix-eabi/lib/thumb/cm4/hardfp/fpv4/libc.a \
+                 $(ARM_MIOSIX_EABI)/arm-miosix-eabi/lib/thumb/cm4/hardfp/fpv4/libstdc++.a \
+                 $(ARM_MIOSIX_EABI)/arm-miosix-eabi/lib/thumb/cm4/hardfp/fpv4/libm.a \
+                 $(ARM_MIOSIX_EABI)/lib/gcc/arm-miosix-eabi/4.7.3/thumb/cm4/hardfp/fpv4/libgcc.a
 
     ##-------------------------------------------------------------------------
     ## BOARD: stm32f407vg_stm32f4discovery
@@ -1488,6 +1504,11 @@ else ifeq ($(ARCH),cortexM3_stm32f2)
     ## Base directory with else header files for this board
     ARCH_INC := arch/cortexM3_stm32f2/common
 
+    ## Libraries
+    ARCH_LIBS := $(ARM_MIOSIX_EABI)/arm-miosix-eabi/lib/thumb/cm3/libc.a \
+                 $(ARM_MIOSIX_EABI)/arm-miosix-eabi/lib/thumb/cm3/libstdc++.a \
+                 $(ARM_MIOSIX_EABI)/lib/gcc/arm-miosix-eabi/4.7.3/thumb/cm3/libgcc.a
+
     ##-------------------------------------------------------------------------
     ## BOARD: stm32f207ig_stm3220g-eval
     ##
@@ -1753,6 +1774,11 @@ else ifeq ($(ARCH),cortexM3_stm32l1)
     ## Base directory with else header files for this board
     ARCH_INC := arch/cortexM3_stm32l1/common
 
+    ## Libraries
+    ARCH_LIBS := $(ARM_MIOSIX_EABI)/arm-miosix-eabi/lib/thumb/cm3/libc.a \
+                 $(ARM_MIOSIX_EABI)/arm-miosix-eabi/lib/thumb/cm3/libstdc++.a \
+                 $(ARM_MIOSIX_EABI)/lib/gcc/arm-miosix-eabi/4.7.3/thumb/cm3/libgcc.a
+
     ##-------------------------------------------------------------------------
     ## BOARD: stm32l151c8_als_mainboard
     ##
@@ -1830,6 +1856,11 @@ else ifeq ($(ARCH),cortexM3_stm32l1)
 else ifeq ($(ARCH),cortexM3_efm32gg)
     ## Base directory with else header files for this board
     ARCH_INC := arch/cortexM3_efm32gg/common
+
+    ## Libraries
+    ARCH_LIBS := $(ARM_MIOSIX_EABI)/arm-miosix-eabi/lib/thumb/cm3/libc.a \
+                 $(ARM_MIOSIX_EABI)/arm-miosix-eabi/lib/thumb/cm3/libstdc++.a \
+                 $(ARM_MIOSIX_EABI)/lib/gcc/arm-miosix-eabi/4.7.3/thumb/cm3/libgcc.a
 
     ##-------------------------------------------------------------------------
     ## BOARD: efm32gg332f1024_wandstem
@@ -1913,6 +1944,11 @@ else ifeq ($(ARCH),cortexM3_efm32gg)
 else ifeq ($(ARCH),cortexM7_stm32f7)
     ## Base directory with else header files for this board
     ARCH_INC := arch/cortexM7_stm32f7/common
+
+    ## Libraries
+    ARCH_LIBS := $(ARM_MIOSIX_EABI)/arm-miosix-eabi/lib/libc.a \
+                 $(ARM_MIOSIX_EABI)/arm-miosix-eabi/lib/libstdc++.a \
+                 $(ARM_MIOSIX_EABI)/lib/gcc/arm-miosix-eabi/4.7.3/libgcc.a
 
     ##-------------------------------------------------------------------------
     ## BOARD: stm32f746zg_nucleo
@@ -2001,6 +2037,11 @@ else ifeq ($(ARCH),cortexM7_stm32f7)
 else ifeq ($(ARCH),cortexM7_stm32h7)
     ## Base directory with else header files for this board
     ARCH_INC := arch/cortexM7_stm32h7/common
+
+    ## Libraries
+    ARCH_LIBS := $(ARM_MIOSIX_EABI)/arm-miosix-eabi/lib/libc.a \
+                 $(ARM_MIOSIX_EABI)/arm-miosix-eabi/lib/libstdc++.a \
+                 $(ARM_MIOSIX_EABI)/lib/gcc/arm-miosix-eabi/4.7.3/libgcc.a
 
     ##-------------------------------------------------------------------------
     ## BOARD: stm32h753xi_eval

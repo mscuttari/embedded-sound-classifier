@@ -1,12 +1,18 @@
 ##
 ## Makefile for Miosix embedded OS
 ##
+
 MAKEFILE_VERSION := 1.07
+
 ## Path to kernel directory (edited by init_project_out_of_git_repo.pl)
 KPATH := miosix
+
 ## Path to config directory (edited by init_project_out_of_git_repo.pl)
 CONFPATH := $(KPATH)
 include $(CONFPATH)/config/Makefile.inc
+
+ARM_MIOSIX_EABI := C:/arm-miosix-eabi
+ARM_NONE_EABI = D:/arm-none-eabi
 
 ##
 ## List here subdirectories which contains makefiles
@@ -18,7 +24,7 @@ SUBDIRS := $(KPATH)
 ##
 SRC := \
 src/main.cpp \
-src/fft/fft.c \
+src/fft/fft.cpp \
 src/fft/window.cpp \
 src/neural-network/aeabi_memcpy.c \
 src/neural-network/arm_dot_prod_f32.c \
@@ -65,8 +71,8 @@ AFLAGS   := $(AFLAGS_BASE)
 LFLAGS   := $(LFLAGS_BASE)
 DFLAGS   := -MMD -MP
 
-LINK_LIBS := $(LIBS) -L$(KPATH) -Wl,--start-group -lmiosix -lstdc++ -lc \
-             -lm -lgcc -Wl,--end-group
+# LINK_LIBS := $(LIBS) -L$(KPATH) -Wl,--start-group -lmiosix -lstdc++ -lc -lm -lgcc -Wl,--end-group
+LINK_LIBS := $(LIBS) -L${CMAKE_CURRENT_BINARY_DIR}/${KPATH_REL} -Wl,--start-group -lmiosix $(ARCH_LIBS) -Wl,--end-group
 
 all: all-recursive main
 
@@ -99,7 +105,8 @@ main: main.elf
 
 main.elf: $(OBJ) all-recursive
 	$(ECHO) "[LD  ] main.elf"
-	$(Q)$(CXX) $(LFLAGS) -o main.elf $(OBJ) $(KPATH)/$(BOOT_FILE) $(LINK_LIBS)
+    $(Q)$(ARM_NONE_EABI)/bin/arm-none-eabi-gcc $(LFLAGS) -o main.elf $(OBJ) $(KPATH)/$(BOOT_FILE) $(LINK_LIBS)
+##	$(Q)$(CXX) $(LFLAGS) -o main.elf $(OBJ) $(KPATH)/$(BOOT_FILE) $(LINK_LIBS)
 
 %.o: %.s
 	$(ECHO) "[AS  ] $<"
