@@ -13,7 +13,7 @@
 
 // Uncomment to switch to FFT data transfer mode.
 // To be used to get the data to train the neural network.
-//#define TRAINING
+#define TRAINING
 
 
 using namespace std;
@@ -59,9 +59,10 @@ template<typename T>
 float normalize(T value, bool sign);
 
 
+
 // FFT
 #define FFT_SIZE 1024
-FFT fft(FFT_SIZE);
+static FFT* fft;
 
 
 // Neural network
@@ -76,8 +77,17 @@ static state_t state;
 
 
 int main() {
+    try {
+        // Initialize the FFT structure
+        static FFT mFFT(FFT_SIZE);
+        fft = &mFFT;
+
+    } catch (exception &e) {
+        printf("%s\r\n", e.what());
+        while (true);
+    }
+
     // Peripherals setup
-    Microphone& microphone = Microphone::getInstance();
     Crc::init();
     setRawStdout();
 
@@ -88,7 +98,7 @@ int main() {
         printf("Neural network created\r\n");
     } else {
         printf("Neural network creation error - type = %lu, code = %lu\r\n", aiError.type, aiError.code);
-        while(true);
+        while (true);
     }
 
     const ai_network_params networkParams = AI_NETWORK_PARAMS_INIT(
@@ -105,7 +115,7 @@ int main() {
     }
 
     nn_input[0].n_batches = 1;
-    nn_input[0].data = AI_HANDLE_PTR(fft.getBins());
+    nn_input[0].data = AI_HANDLE_PTR(fft->getBins());
     nn_output[0].n_batches = 1;
     nn_output[0].data = AI_HANDLE_PTR(nn_outData);
 
@@ -115,11 +125,12 @@ int main() {
         UserButton::wait();
         state = NONE;
         sendStartSignal();
-        microphone.start(bind(scanAudio, placeholders::_1, placeholders::_2), fft.getSize());
+        function<void (short*, unsigned int)> callback = bind(scanAudio, placeholders::_1, placeholders::_2);
+        Microphone::start(callback, fft->getSize());
 
         // Stop on second button press
         UserButton::wait();
-        microphone.stop();
+        Microphone::stop();
         sendStopSignal();
     }
 }
@@ -134,7 +145,7 @@ void setRawStdout() {
 
 
 void sendStartSignal() {
-    printf("#start\r\n");
+    printf("#start\n");
 
     #ifdef TRAINING
         int value = FFT_SIZE / 2 * sizeof(float);
@@ -148,7 +159,7 @@ void sendStopSignal() {
         int value = 0;
         write(STDOUT_FILENO, &value, sizeof(int));
     #else
-        printf("#stop\r\n");
+        printf("#stop\n");
     #endif
 }
 
@@ -159,20 +170,20 @@ void scanAudio(short* data, unsigned int n) {
     for (unsigned int i = 0; i < n; i++) {
         float value = normalize<short>(data[i], true);
         value = hann.apply(value, i);
-        fft.addSample(value);;
+        fft->addSample(value);;
     }
 
     // If the data is not enough, fill with zeros
-    for (int i = n; i < fft.getSize(); i++) {
-        fft.addSample(0);
+    for (int i = n; i < fft->getSize(); i++) {
+        fft->addSample(0);
     }
 
-    fft.process();
+    fft->process();
 
     #ifdef TRAINING
         int s = FFT_SIZE / 2 * sizeof(float);
         write(STDOUT_FILENO, &s, sizeof(int));
-        write(STDOUT_FILENO, fftOutput, s);
+        write(STDOUT_FILENO, fft->getBins(), s);
     #else
         ai_network_run(network, &nn_input[0], &nn_output[0]);
 

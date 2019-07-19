@@ -1,5 +1,8 @@
 #include "microphone.h"
+#include <miosix.h>
 #include <kernel/scheduler/scheduler.h>
+
+using namespace miosix;
 
 typedef Gpio<GPIOB_BASE, 10> clk;   // CLK pin
 typedef Gpio<GPIOC_BASE, 3> dout;   // Microphone signal pin
@@ -10,10 +13,29 @@ static BufferQueue<unsigned short, bufferSize, bufferNumber> *bq;
 
 static Thread *waiting;
 static bool enobuf = true;
-static const char filterOrder = 4;
-static unsigned short intReg[filterOrder] = {0,0,0,0};
-static unsigned short combReg[filterOrder] = {0,0,0,0};
-static signed char pdmLUT[] = {-1, 1};
+static bool recording;                      // Whether the recording is in progress or not
+
+static void* mainLoopLauncher(void* arg);   // Used for mainLoop thread creation.
+static void mainLoop();                     // Function that manages the transcoding
+static pthread_t mainLoopThread;            // Thread taking care of transcoding
+
+// Double buffering
+static short *readyBuffer;
+static short *processingBuffer;
+static bool isBufferReady;
+
+static unsigned int PCMsize;    // How many PCM samples to collect before executing the callback
+static unsigned int PCMindex;   // Transcoding progress index
+
+static bool processPdm(const unsigned short *pdmBuffer, int size);              // Convert PDM buffer to PCM samples
+static short PDMFilter(const unsigned short* pdmBuffer, unsigned int index);    // Get single PCM sample from PDM values
+
+static void* callbackLauncher(void* arg);               // Used for execCallback thread creation
+static void execCallback();                             // Function that executes the callback when the PCM samples are ready
+static function<void (short*, unsigned int)> callback;  // Function called when the PCM samples are ready to be processed
+
+static pthread_mutex_t bufMutex = PTHREAD_MUTEX_INITIALIZER;
+static pthread_cond_t cbackExecCond = PTHREAD_COND_INITIALIZER;
 
 
 /**
@@ -58,7 +80,7 @@ static const unsigned short *getReadableBuffer() {
     unsigned int size;
     
     while (!bq->tryGetReadableBuffer(result, size)) {
-        waiting->IRQwait();
+        Thread::IRQwait();
         
         {
             FastInterruptEnableLock eLock(dLock);
@@ -99,65 +121,59 @@ void __attribute__((used)) I2SdmaHandlerImpl() {
     IRQdmaRefill();
     waiting->IRQwakeup();
     
-    if (waiting->IRQgetPriority()>Thread::IRQgetCurrentThread()->IRQgetPriority())
+    if (waiting->IRQgetPriority()>Thread::IRQgetCurrentThread()->IRQgetPriority()) {
         Scheduler::IRQfindNextThread();
+    }
 }
 
 
-Microphone& Microphone::getInstance() {
-    static Microphone instance;
-    return instance;
-}
+bool Microphone::start(function<void (short*, unsigned int)> cb, unsigned int buffsize) {
+    if (recording)
+        return false;
 
+    callback = cb;
+    PCMsize = buffsize;
+    recording = true;
+    readyBuffer = (short *) malloc(buffsize * sizeof(short));
+    processingBuffer = (short *) malloc(buffsize * sizeof(short));
 
-Microphone::Microphone() {
-
-}
-
-
-void Microphone::start(function<void (short*, unsigned int)> cb, unsigned int buffsize) {
-    this->callback = cb;
-    this->PCMsize = buffsize;
-    this->recording = true;
-    this->readyBuffer = (short*) malloc(PCMsize * sizeof(short));
-    this->processingBuffer = (short*) malloc(PCMsize * sizeof(short));
-    
     {
         FastInterruptDisableLock dLock;
-        
+
         // Enable DMA1, SPI2, GPIOB and GPIOC
         RCC->AHB1ENR |= RCC_AHB1ENR_DMA1EN;
-        RCC->APB1ENR |= RCC_APB1ENR_SPI2EN;   
+        RCC->APB1ENR |= RCC_APB1ENR_SPI2EN;
         RCC->AHB1ENR |= RCC_AHB1ENR_GPIOBEN | RCC_AHB1ENR_GPIOCEN;
-        
+
         // Configure GPIOs
         // (see chapter 8.3.2 of the datasheet for the alternate functions list)
 
         clk::mode(Mode::ALTERNATE);
         clk::alternateFunction(5);
         clk::speed(Speed::_50MHz);
-        
+
         dout::mode(Mode::ALTERNATE);
         dout::alternateFunction(5);
         dout::speed(Speed::_50MHz);
 
-        // Set the 16 kHz sampling rate
+        // Set the 32 kHz sampling rate
         // (see chapters 7.3.23 and 28.4.4 of the datasheet for further details)
 
-        const unsigned int PLLI2S_N = 213;
-        const unsigned int PLLI2S_R = 2;
-        const unsigned int I2SDIV = 13;
+        const unsigned int PLLI2S_N = 213u;
+        const unsigned int PLLI2S_R = 2u;
+        const unsigned int I2SDIV = 13u;
 
-        SPI2->I2SPR = (I2SDIV << 0);
-        RCC->PLLI2SCFGR = (PLLI2S_R << 28) | (PLLI2S_N << 6);
+        SPI2->I2SPR = (I2SDIV << 0u);
+
+        RCC->PLLI2SCFGR = (PLLI2S_R << 28u) | (PLLI2S_N << 6u);
 
         // Enable I2S
         RCC->CR |= RCC_CR_PLLI2SON;
     }
-    
+
     // Wait for PLL to lock
     while ((RCC->CR & RCC_CR_PLLI2SRDY) == 0);
-    
+
     // RX buffer not empty interrupt enable
     SPI2->CR2 = SPI_CR2_RXDMAEN;
 
@@ -174,8 +190,9 @@ void Microphone::start(function<void (short*, unsigned int)> cb, unsigned int bu
 
     // Wait for the microphone to enable
     delayMs(10);
-    
-    pthread_create(&mainLoopThread, nullptr, mainLoopLauncher, reinterpret_cast<void*>(this));
+
+    pthread_create(&mainLoopThread, nullptr, mainLoopLauncher, nullptr);
+    return true;
 }
 
 
@@ -201,20 +218,20 @@ void Microphone::stop() {
 }
 
 
-void* Microphone::mainLoopLauncher(void* arg) {
-    reinterpret_cast<Microphone*>(arg)->mainLoop();
+void* mainLoopLauncher(void* arg) {
+    mainLoop();
     return nullptr;
 }
 
 
-void Microphone::mainLoop() {
+void mainLoop() {
     waiting = Thread::getCurrentThread();
     pthread_t cback;
     bq = new BufferQueue<unsigned short, bufferSize, bufferNumber>();
     NVIC_EnableIRQ(DMA1_Stream3_IRQn);
     
     // Create the thread that will execute the callbacks 
-    pthread_create(&cback, nullptr, callbackLauncher, reinterpret_cast<void*>(this));
+    pthread_create(&cback, nullptr, callbackLauncher, nullptr);
     isBufferReady = false;
     
     // Variable used for swap of processing and ready buffer
@@ -261,13 +278,13 @@ void Microphone::mainLoop() {
 }
 
 
-void* Microphone::callbackLauncher(void* arg) {
-    reinterpret_cast<Microphone*>(arg)->execCallback();
+void* callbackLauncher(void* arg) {
+    execCallback();
     return nullptr;
 }
 
 
-void Microphone::execCallback() {
+void execCallback() {
     while (recording) {
         pthread_mutex_lock(&bufMutex);
         
@@ -282,7 +299,7 @@ void Microphone::execCallback() {
 }
 
 
-bool Microphone::processPdm(const unsigned short *pdmBuffer, int size) {
+bool processPdm(const unsigned short *pdmBuffer, int size) {
     int remaining = PCMsize - PCMindex;
     int length = min(remaining, size);
 
@@ -295,13 +312,18 @@ bool Microphone::processPdm(const unsigned short *pdmBuffer, int size) {
 
 
 
-short Microphone::PDMFilter(const unsigned short *pdmBuffer, unsigned int index) {
+short PDMFilter(const unsigned short *pdmBuffer, unsigned int index) {
+    static const char filterOrder = 4;
+    static unsigned short intReg[filterOrder] = {0,0,0,0};
+    static unsigned short combReg[filterOrder] = {0,0,0,0};
+    static signed char pdmLUT[] = {-1, 1};
+
     short combInput, combRes = 0;
     
     // Perform integration on the first word of the PDM chunk to be filtered
-    for (short i=0; i < 16; i++){
+    for (unsigned short i = 0; i < 16; i++){
         // Integrate each single bit
-        intReg[0] += pdmLUT[(pdmBuffer[index] >> (15-i)) & 1];
+        intReg[0] += pdmLUT[(pdmBuffer[index] >> (15u - i)) & 1u];
         
         for (short j=1; j < filterOrder; j++){
             intReg[j] += intReg[j-1];
@@ -312,9 +334,9 @@ short Microphone::PDMFilter(const unsigned short *pdmBuffer, unsigned int index)
     combInput = intReg[filterOrder-1];
     
     // Apply the comb filter (with delay 1):
-    for (short i=0; i < filterOrder; i++){
-        combRes = combInput - combReg[i];
-        combReg[i] = combInput;
+    for (unsigned short &i : combReg){
+        combRes = combInput - i;
+        i = combInput;
         combInput = combRes;
     }
     
