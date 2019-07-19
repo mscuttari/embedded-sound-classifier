@@ -2,10 +2,11 @@
 #
 # Copyright (C) 2019 Michele Scuttari, Marina Nikolic
 #
-# Usage: FFT_receive.py filename
-# Example: ./FFT_receive.py fft.csv
+# Usage: FFT_receive.py serial_port_name filename
+# Example: ./FFT_receive.py COM1 fft.csv
 
 import sys, serial, os
+from serial import SerialException
 from subprocess import call
 
 # bytes representing the expected size of the audio data chunk
@@ -30,22 +31,38 @@ beginSignal = "#start"
 defaultFileName = "fft.csv"
 
 # Setup serial port (no timeout specified)
-ser = serial.Serial("COM6",					\
-					115200,							\
-					stopbits = serial.STOPBITS_ONE,	\
-					parity = serial.PARITY_NONE,	\
-					bytesize = serial.EIGHTBITS,	\
-					timeout = None, 				\
-					rtscts = False,					\
-					dsrdtr = False,					\
-					xonxoff = False
-					)
+
+portName = "COM1"
 
 if len(sys.argv) == 1:
+	print("[WARNING] No serial port specified. Assuming %s" % portName)
+else:
+	portName = sys.argv[1]
+
+try:
+	ser = serial.Serial(port = portName,				\
+						baudrate = 115200,				\
+						stopbits = serial.STOPBITS_ONE,	\
+						parity = serial.PARITY_NONE,	\
+						bytesize = serial.EIGHTBITS,	\
+						timeout = None, 				\
+						rtscts = False,					\
+						dsrdtr = False,					\
+						xonxoff = False
+						)
+except ValueError:
+	print("[ERROR] Invalid port configuration")
+	sys.exit(-1)
+
+except SerialException:
+	print("[ERROR] Can't open port", portName)
+	sys.exit(-1)
+
+if len(sys.argv) <= 2:
 	fileName = defaultFileName
 	print("Default name '" + defaultFileName + "' assigned.\nUse ./FFT_receive.py filename to specify a different output file name.")
 else:
-	fileName = sys.argv[1]
+	fileName = sys.argv[2]
 
 outputFile = open("fft.raw", "wb")
 
@@ -55,7 +72,7 @@ sample = ""
 
 while sample != beginSignal:
 	sample = ser.readline().decode()
-	sample = sample.split("\n")[0]
+	sample = sample.split("\r\n")[0]
 
 print("Started recording.", flush=True)
 

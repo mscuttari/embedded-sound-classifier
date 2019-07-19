@@ -1,6 +1,6 @@
 #!/usr/bin/python3
 #
-# Copyright (C) 2019 Michele Scuttari & Marina Nikolic
+# Copyright (C) 2019 Michele Scuttari, Marina Nikolic
 #
 # Usage: keylogger.py serial_port_name
 # Example: py keylogger.py COM1
@@ -42,19 +42,22 @@ message = ""
 
 while (message != "#start"):
 	message = ser.readline().decode()
-	message = message.split("\n")[0]
+	message = message.split("\r\n")[0]
 
 # Start logging
-print("Listening...")
+print("Listening...\n")
 
 somethingPrinted = False
 message = ser.readline().decode()
 
 while (message != "#stop"):
-	print(message, end = '')
+	if (len(message) > 0):
+		print(message)
+	
 	somethingPrinted |= len(message) > 0;
+	
 	message = ser.readline().decode()
-	message = message.split("\n")[0]
+	message = message.split("\r\n")[0]
 
 if (somethingPrinted):
 	print("\nStopped")

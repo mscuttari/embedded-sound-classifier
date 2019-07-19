@@ -13,7 +13,7 @@
 
 // Uncomment to switch to FFT data transfer mode.
 // To be used to get the data to train the neural network.
-#define TRAINING
+//#define TRAINING
 
 
 using namespace std;
@@ -145,7 +145,7 @@ void setRawStdout() {
 
 
 void sendStartSignal() {
-    printf("#start\n");
+    printf("#start\r\n");
 
     #ifdef TRAINING
         int value = FFT_SIZE / 2 * sizeof(float);
@@ -159,7 +159,7 @@ void sendStopSignal() {
         int value = 0;
         write(STDOUT_FILENO, &value, sizeof(int));
     #else
-        printf("#stop\n");
+        printf("#stop\r\n");
     #endif
 }
 
