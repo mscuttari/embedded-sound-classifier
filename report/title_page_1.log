@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.20 (MiKTeX 2.9.7050 64-bit) (preloaded format=pdflatex 2019.7.4)  18 JUL 2019 11:26
+This is pdfTeX, Version 3.14159265-2.6-1.40.20 (MiKTeX 2.9.7050 64-bit) (preloaded format=pdflatex 2019.7.4)  23 JUL 2019 10:55
 entering extended mode
 **./title_page_1.tex
 (title_page_1.tex
@@ -588,22 +588,32 @@ File: omscmr.fd 2014/09/29 v2.5h Standard LaTeX font definitions
 LaTeX Font Info:    Font shape `OMS/cmr/m/n' in size <12> not available
 (Font)              Font shape `OMS/cmsy/m/n' tried instead on input line 134.
 [1] [2]
-<frog.jpg, id=49, 748.7975pt x 741.77126pt>
-File: frog.jpg Graphic file (type jpg)
-<use frog.jpg>
-Package pdftex.def Info: frog.jpg  used on input line 176.
-(pdftex.def)             Requested size: 195.0pt x 193.1729pt.
- [3 <./frog.jpg>] [4] (title_page_1.aux)
+
+LaTeX Warning: File `frog.jpg' not found on input line 176.
+
+
+! Package pdftex.def Error: File `frog.jpg' not found: using draft setting.
+
+See the pdftex.def package documentation for explanation.
+Type  H <return>  for immediate help.
+ ...                                              
+                                                  
+l.176 ...degraphics[width=0.5\textwidth]{frog.jpg}
+                                                  
+Try typing  <return>  to proceed.
+If that doesn't work, type  X <return>  to quit.
+
+[3] [4] (title_page_1.aux)
 
 LaTeX Font Warning: Some font shapes were not available, defaults substituted.
 
  ) 
 Here is how much of TeX's memory you used:
- 13890 strings out of 492895
- 275259 string characters out of 3133480
- 338555 words of memory out of 3000000
- 17503 multiletter control sequences out of 15000+200000
- 12172 words of font info for 43 fonts, out of 3000000 for 9000
+ 13888 strings out of 492895
+ 275197 string characters out of 3133480
+ 337555 words of memory out of 3000000
+ 17500 multiletter control sequences out of 15000+200000
+ 12341 words of font info for 44 fonts, out of 3000000 for 9000
  1141 hyphenation exceptions out of 8191
  62i,9n,81p,434b,956s stack positions out of 5000i,500n,10000p,200000b,50000s
 <C:/Program Files/MiKTeX 2.9/fonts/type1/public/amsfonts/cm/cmbx10.pfb><C:/Pr
@@ -615,10 +625,11 @@ pe1/public/amsfonts/cm/cmmi8.pfb><C:/Program Files/MiKTeX 2.9/fonts/type1/publi
 c/amsfonts/cm/cmr10.pfb><C:/Program Files/MiKTeX 2.9/fonts/type1/public/amsfont
 s/cm/cmr12.pfb><C:/Program Files/MiKTeX 2.9/fonts/type1/public/amsfonts/cm/cmr8
 .pfb><C:/Program Files/MiKTeX 2.9/fonts/type1/public/amsfonts/cm/cmsy10.pfb><C:
-/Program Files/MiKTeX 2.9/fonts/type1/public/amsfonts/cm/cmti12.pfb>
-Output written on title_page_1.pdf (5 pages, 308635 bytes).
+/Program Files/MiKTeX 2.9/fonts/type1/public/amsfonts/cm/cmti12.pfb><C:/Program
+ Files/MiKTeX 2.9/fonts/type1/public/amsfonts/cm/cmtt12.pfb>
+Output written on title_page_1.pdf (5 pages, 215351 bytes).
 PDF statistics:
- 93 PDF objects out of 1000 (max. 8388607)
+ 96 PDF objects out of 1000 (max. 8388607)
  0 named destinations out of 1000 (max. 500000)
- 119 words of extra memory for PDF output out of 10000 (max. 10000000)
+ 114 words of extra memory for PDF output out of 10000 (max. 10000000)
 
