@@ -70,15 +70,15 @@
 \begin{minipage}{0.4\textwidth}
 \begin{flushleft} \large
 \emph{Author:}\\
+Marina \textsc{Nikolic}
 Michele \textsc{Scuttari}
-Marina \textsc{Nikolic} % Your name
 \end{flushleft}
 \end{minipage}
 ~
 \begin{minipage}{0.4\textwidth}
 \begin{flushright} \large
 \emph{Supervisor:} \\
-Dr. Federico \textsc{Terraneo} % Supervisor's Name
+Dr. Federico \textsc{Terraneo}
 \end{flushright}
 \end{minipage}\\[1.5cm]
 
@@ -99,7 +99,7 @@ Dr. Federico \textsc{Terraneo} % Supervisor's Name
 
 
 \begin{center}
-	\includegraphics[scale=0.25]{Logo_Politecnico_Milano.png}                                               
+	\includegraphics[scale=0.25]{img/Logo_Politecnico_Milano.png}                                               
 \end{center}
 
 % Include a department/university logo - this will require the graphicx package 
@@ -122,12 +122,14 @@ In this document we will discuss about the implementation of a sound classifier 
 \subsection{The Problem To Solve}
 % ...
 \subsection{Why Neural Networks?}
-For recognition and analysis of sound, AI techinques are used because of the complexity of the computations and the amount of noise present in the environment. Another important issue is that instances of the same sound have high variability due to different (yet omogeneus) sources. For example, think about word recognition: an effective application should recognise a word even if spoken by different people. 
+For recognition and analysis of sound, AI techinques are used because of the complexity of the computations and the amount of noise present in the environment. Another important issue is that instances of the same sound have high variability due to different (yet homogeneous) sources. For example, think about word recognition: an effective application should recognise a word even if spoken by different people.
+
 \subsubsection{Which kind of NN?}
-Here we are using a sequential feed-forward neural network. Since we are trying to distinguish two differnt sounds, the NN is a classifier which output has one-hot codification. 
-This simple model is expected to work because of the simplicity of the problem and the caracterization of the two sounds. It gets as input the FFT of a time window.
+The neural network used in this project is a sequential feed-forward one. Since the aim is to distinguish two different sounds, the NN is a classifier which input is the FFT of a time window and the output has one-hot encoding.\\
+This simple model is expected to work because of the simplicity of the problem and the characterization of the two sounds.
+
 \subsubsection{How to implement NN on a board?}
-The STM32cube.ai allows to compile a pre-trained neural network into a library to be called in the code. %... more about STM32Cube.ai
+The \textbf{STM32cube.ai} allows to compile a pre-trained neural network into a library to be called in the code.
 
 \subsection{Acronyms and Definitions}
 \begin{itemize}
@@ -141,10 +143,10 @@ The STM32cube.ai allows to compile a pre-trained neural network into a library t
 \subsection{Board Programming}
 \subsubsection{Board description}
 The board in use is a \textbf{STM32F4 Discovery} (STM32F407VGT6) and makes use of the open source operating system Miosix.\\
-The peripherals used in this project are the microphone, the user button and the USART, although also the CRC module is enabled because needed by the ST's AI library.
+The peripherals used in this project are the microphone, the user button and the \text{USART}, although also the CRC module is enabled because needed by the ST's AI library.
 
 \subsubsection{Microphone}
-The board is equipped with a \textbf{MP45DT02} MEMS microphone, which produces a stream of 1-bit Digital Pulse Modulation (PDM) samples. The PDM samples are then converted to 16-bit signed PCM samples by using a low pass filter.\\
+The board is equipped with a \textbf{MP45DT02} MEMS microphone, which produces a stream of 1-bit \textbf{Digital Pulse Modulation} (PDM) samples. The PDM samples are received using DMA and then converted to 16-bit signed \textbf{Pulse Code Modulation} (PCM) samples through the usage of a software low pass filter.\\
 In the end, the PCM data is sampled at a frequency of 32 kHz, which is obtained by setting the \textit{PLLI2SN}, \textit{PLLI2SR} and \textit{I2SDIV} registers to appropriate values (see chapters \textit{7.3.23} and \textit{28.4.4} of the datasheet for further details).
 \begin{flalign*}
 &f_\text{(VCO clock)} = f_\text{(PLLI2S clock input)} * \frac{PLLI2SN}{PLLM} = 8\text{ MHz}\ \frac{213}{8} = 213 \text{ MHz}\\
@@ -152,17 +154,18 @@ In the end, the PCM data is sampled at a frequency of 32 kHz, which is obtained 
 &f_\text{(PDM)} = \frac{f_\text{(PLL I2S clock output)}}{2 * I2SDIV * 8} = \frac{106,5\text{ MHz}}{2 * 13 * 8} = 512\text{ kHz}\\
 &f_\text{(PCM)} = \frac{f_\text{(PDM)}}{16} = \frac{512\text{ kHz}}{16} = 32\text{ kHz}
 \end{flalign*}
-The driver also uses a double buffering strategy: one buffer is used to collect the real time PDM samples coming from the microphone, while the other is used to contain the data to be processed. This way, while DMA refills the first buffer, the other one doesn't change and its data can be processed. When the DMA refills end, an interrupt is raised and the buffers are swapped.
+The driver also uses a double buffering strategy: one buffer (the ``ready buffer'') contains the stable data that are sent to the network, while the other one (the ``processing buffer'') is populated by the new incoming samples. When the processing buffer is full, they are swapped and thus the meanwhile collected data becomes ready.
 
 \subsubsection{FFT}
-The PCM samples are considered in blocks of 1024 values. On each window, the FFT is computed and, being the output symmetric (because all the input has zero imaginary part), only half of the 1024 output bins are taken. Before the values are processed, they are normalized and passed through a Hann window function.\\
+The PCM samples are considered in blocks of 1024 values, called \textbf{windows}. On each window, the FFT is computed and, being the output symmetric (because all the input has zero imaginary part), only half of the 1024 output bins are taken. Before the values are processed, they are normalized and passed through a \textbf{Hann function}, which makes sure that the discontinuity at the windows borders are eliminated.\\
 Being the Cortex M4 equipped with the \textbf{Digital Signal Processor} (DSP), the conversion is done using the dedicated hardware.
 
 \subsubsection{User button}
-The user button press is handled by enabling the EXTI0 interrupt. The calling thread is paused while waiting for the press event. Moreover, a software debouncing feature is implemented in order to avoid multiple clicks due to the mechanical structure of the button.
+The user button press is handled by enabling the \textbf{EXTI0} interrupt. The calling thread is paused while waiting for the press event.\\
+Moreover, a software debouncing feature is implemented in order to avoid multiple clicks due to the mechanical structure of the button.
 
 \subsubsection{USART}
-The communication between the board and the client is done through USART connection (PA2 = TX, PA3 = RX), configured with a speed of 115200 bps.
+The communication between the board and the client is done through \text{USART} connection (\textit{PA2 = TX, PA3 = RX}), configured with a speed of \text{115200 bps}.
 
 \subsubsection{Neural network library}
 The neural network library is generated by the X-CUBE-AI expansion pack for STM32CubeMX. This tool automatically converts the pretrained Keras model into a C library that can be called by the main program.\\
@@ -175,7 +178,7 @@ Instead, the core of the network runtime is provided by ST as a static closed so
 \end{itemize}
 
 \subsection{Network Training}
-The board software can be compiled in two different way, by enabling or disabling the \textit{TRAINING} variable definition. When defined, the neural network is not executed and the FFT samples are directly transferred to the client. This way, it is possible to obtain the data to separately train the network. When trained and uploaded, the variable definition can be removed in order to enable the normal operating mode, in which the neural network runs and outputs the recognized sound.
+The software can be compiled in two different ways, by enabling or disabling the \textit{TRAINING} variable definition. When the variable is defined, the neural network is not executed and the FFT samples are directly transferred to the client. This way, it is possible to obtain the data to separately train the network. When the network is trained and uploaded, the variable definition can be removed in order to enable the normal operating mode, in which the neural network runs and outputs the recognized sounds.
 
 \subsection{Testing}
 
