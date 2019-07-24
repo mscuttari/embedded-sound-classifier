@@ -105,36 +105,41 @@ int main() {
     }
 
     // Peripherals setup
-    Crc::init();
+    #ifdef TRAINING
+        Crc::init();
+    #endif
+
     setRawStdout();
 
     // Neural network setup
-    ai_error aiError = ai_network_create(&network, (ai_buffer*) AI_NETWORK_DATA_CONFIG);
+    #ifdef TRAINING
+        ai_error aiError = ai_network_create(&network, (ai_buffer*) AI_NETWORK_DATA_CONFIG);
 
-    if (aiError.type == AI_ERROR_NONE) {
-        printf("Neural network created\r\n");
-    } else {
-        printf("Neural network creation error - type = %lu, code = %lu\r\n", aiError.type, aiError.code);
-        while (true);
-    }
+        if (aiError.type == AI_ERROR_NONE) {
+            printf("Neural network created\r\n");
+        } else {
+            printf("Neural network creation error - type = %lu, code = %lu\r\n", aiError.type, aiError.code);
+            while (true);
+        }
 
-    const ai_network_params networkParams = AI_NETWORK_PARAMS_INIT(
-            AI_NETWORK_DATA_WEIGHTS(ai_network_data_weights_get()),
-            AI_NETWORK_DATA_ACTIVATIONS(nn_activations)
-    );
+        const ai_network_params networkParams = AI_NETWORK_PARAMS_INIT(
+                AI_NETWORK_DATA_WEIGHTS(ai_network_data_weights_get()),
+                AI_NETWORK_DATA_ACTIVATIONS(nn_activations)
+        );
 
-    if (ai_network_init(network, &networkParams)) {
-        printf("Neural network initialized\r\n");
-    } else {
-        ai_error error = ai_network_get_error(network);
-        printf("Neural network initialization error - type = %lu, code = %lu\r\n", error.type, error.code);
-        while(true);
-    }
+        if (ai_network_init(network, &networkParams)) {
+            printf("Neural network initialized\r\n");
+        } else {
+            ai_error error = ai_network_get_error(network);
+            printf("Neural network initialization error - type = %lu, code = %lu\r\n", error.type, error.code);
+            while(true);
+        }
 
-    nn_input[0].n_batches = 1;
-    nn_input[0].data = AI_HANDLE_PTR(fft->getBins());
-    nn_output[0].n_batches = 1;
-    nn_output[0].data = AI_HANDLE_PTR(nn_outData);
+        nn_input[0].n_batches = 1;
+        nn_input[0].data = AI_HANDLE_PTR(fft->getBins());
+        nn_output[0].n_batches = 1;
+        nn_output[0].data = AI_HANDLE_PTR(nn_outData);
+    #endif
 
     // Main loop
     while (true) {
