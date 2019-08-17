@@ -8,7 +8,12 @@
 \usepackage{amsmath}
 \usepackage{graphicx}
 \usepackage[colorinlistoftodos]{todonotes}
-\usepackage{geometry}
+\usepackage[style=verbose-ibid,backend=bibtex]{biblatex}
+
+% -----------------------
+%      BIBLIOGRAPHY
+% -----------------------
+\bibliography{bibliography}
 
 \begin{document}
 
@@ -67,7 +72,7 @@ Dr. Federico \textsc{Terraneo}
 % -----------------------
 
 \begin{center}
-	\includegraphics[scale=0.24]{img/Logo_Politecnico_Milano.png}                                               
+	\includegraphics[scale=0.23]{img/Logo_Politecnico_Milano.png}                                               
 \end{center}
 
 \vfill
@@ -78,28 +83,26 @@ Dr. Federico \textsc{Terraneo}
 %        CHAPTERS
 % -----------------------
 
-\newgeometry{a4paper,top=2cm,bottom=2cm,left=2cm,right=2cm,heightrounded,bindingoffset=5mm}
-
 \section{Introduction}
 
-\subsection{The Problem To Solve}
+\subsection{The problem to solve}
 The goal of this project is the recognition of specific sounds (whistles and hands claps) through the usage of a STM32 board and a neural network, deployed on the aformentioned board and acting as sound classifier.
 
-\subsection{Why Neural Networks?}
+\subsection{Why neural networks?}
 For recognition and analysis of sound, AI techinques are used because of the complexity of the computations and the amount of noise present in the environment. Another important issue is that instances of the same sound have high variability due to different (yet homogeneous) sources. For example, think about words recognition: an effective application should recognise a word even if spoken by different people.
 
 \subsubsection{Which kind of NN?}
-The neural network used in this project is a sequential feed-forward one. Since the aim is to distinguish two different sounds, the NN is a classifier which input is the FFT of a time window and the output has one-hot encoding.\\
+The neural network used in this project is a sequential feed-forward one. Since the aim is to distinguish two different sounds (actually three, considering also the silence one), the NN is a classifier which input is the FFT of a time window and the output has one-hot encoding.\\
 This simple model is expected to work because of the simplicity of the problem and the characterization of the two sounds.
 
 \subsubsection{How to implement NN on a board?}
-The \textbf{STM32cube.ai} allows to compile a pre-trained neural network into a library to be called in the code.
+The \textbf{STM32cube.ai} package allows to compile a pre-trained neural network into a library to be called in the code.
 
 \subsection{Acronyms and Definitions}
 \begin{itemize}
- \item \textbf{AI:} Artificial Intelligence
- \item \textbf{NN:} Neural Network
- \item \textbf{FFT:} Fast Fourier Transformation
+ \item \textbf{AI}: Artificial Intelligence
+ \item \textbf{NN}: Neural Network
+ \item \textbf{FFT}: Fast Fourier Transformation
 \end{itemize}
 
 
@@ -118,13 +121,19 @@ The PCM data is sampled at a frequency of 32 kHz, which is obtained by setting t
 &f_\text{(PDM)} = \frac{f_\text{(PLL I2S clock output)}}{2 * I2SDIV * 8} = \frac{106,5\text{ MHz}}{2 * 13 * 8} = 512\text{ kHz}\\
 &f_\text{(PCM)} = \frac{f_\text{(PDM)}}{16} = \frac{512\text{ kHz}}{16} = 32\text{ kHz}
 \end{flalign*}
+
+\begin{center}
+    \includegraphics[width=\textwidth]{img/microphone_block_diagram.png}
+\end{center}
+
 The driver also uses a double buffering strategy: one buffer (the ``ready buffer'') contains the stable data that are sent to the network, while the other one (the ``processing buffer'') is populated by the new incoming samples. When the processing buffer is full, they are swapped and thus the meanwhile collected data becomes ready.
+
 \begin{center}
     \includegraphics[width=\textwidth]{img/double_buffering_audio_in.png}
 \end{center}
 
 \subsubsection{FFT}
-The PCM samples are considered in blocks of 1024 values, called ``windows''. Before the values are processed, they are normalized and passed through a \textbf{Hann function}, which makes sure that the discontinuity at the windows borders are eliminated. Then the FFT is computed and, being the output symmetric (because all the input has zero imaginary part), only half of the 1024 output bins are taken. Finally, the magnitude is computed on each single value.\\
+The PCM samples are considered in blocks of 1024 values, called ``windows''. Before the values are processed, they are normalized and passed through a \textbf{Hann function}, which makes sure that the discontinuity at the windows borders are eliminated\footcite{engelberg2008digital}. Then the FFT is computed and, being the output symmetric (because all the input has zero imaginary part), only half of the 1024 output bins are taken\footcite{parker2017digital}. Finally, the magnitude is computed on each single value.\\
 Being the Cortex M4 equipped with the \textbf{Digital Signal Processor} (DSP), the FFTs are determined using the dedicated hardware.
 
 \subsubsection{User button}
