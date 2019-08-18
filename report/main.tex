@@ -83,6 +83,10 @@ Dr. Federico \textsc{Terraneo}
 %        CHAPTERS
 % -----------------------
 
+\begin{abstract}
+Implementation of a sound classifier on a STM32 board.
+\end{abstract}
+
 \section{Introduction}
 
 \subsection{The problem to solve}
@@ -91,20 +95,12 @@ The goal of this project is the recognition of specific sounds (whistles and han
 \subsection{Why neural networks?}
 For recognition and analysis of sound, AI techinques are used because of the complexity of the computations and the amount of noise present in the environment. Another important issue is that instances of the same sound have high variability due to different (yet homogeneous) sources. For example, think about words recognition: an effective application should recognise a word even if spoken by different people.
 
-\subsubsection{Which kind of NN?}
-The neural network used in this project is a sequential feed-forward one. Since the aim is to distinguish two different sounds (actually three, considering also the silence one), the NN is a classifier which input is the FFT of a time window and the output has one-hot encoding.\\
+\subsubsection{Which kind of neural network?}
+The neural network used in this project is a sequential feed-forward one. Since the aim is to distinguish two different sounds (actually three, considering also the silence one), the neural network is a classifier which input is the FFT of a time window and the output has one-hot encoding.\\
 This simple model is expected to work because of the simplicity of the problem and the characterization of the two sounds.
 
-\subsubsection{How to implement NN on a board?}
+\subsubsection{How to implement a neural network on a board?}
 The \textbf{STM32cube.ai} package allows to compile a pre-trained neural network into a library to be called in the code.
-
-\subsection{Acronyms and Definitions}
-\begin{itemize}
- \item \textbf{AI}: Artificial Intelligence
- \item \textbf{NN}: Neural Network
- \item \textbf{FFT}: Fast Fourier Transformation
-\end{itemize}
-
 
 \section{Design and Implementation}
 \subsection{Board Programming}
@@ -157,72 +153,15 @@ Instead, the core of the network runtime is provided by ST as a static closed so
 \subsection{Network Training}
 The software can be compiled in two different ways, by enabling or disabling the \textit{TRAINING} variable definition. When the variable is defined, the neural network is not executed and the FFT samples are directly transferred to the client. This way, it is possible to obtain the data to separately train the network. When the network is trained and uploaded, the variable definition can be removed in order to enable the normal operating mode, in which the neural network runs and outputs the recognized sounds.
 
-\subsection{Testing}
-
 \section{Experimental Results}
+After training the neural network, tests on local samples (different from the training ones) give an accuracy of 99.43\%. Although it may be an overfitting warning, the runtime recognition is quite good: whistles and silence are perfectly identified, while claps are sometimes mistakenly recognized as whistles, probably due to a low amount of claps training samples.\\
 
 \section{Conclusions}
-\subsection{...}
-\subsection{Possible Use Cases}
+
 \subsection{Future Improvements}
+The silence samples used to train the neural network only include basic ambient noise and doesn't take into account other consistent interferences such as human voice. Therefore, false results may be obtained if someone is speaking near the board. To fix this problem, it would be necessary to get more training samples covering also human voice and classify them as silence sounds.
 
-
-% delete when finished writing
-\section{Some \LaTeX{} Examples}
-\label{sec:examples}
-
-\subsection{Sections}
-
-Use section and subsection commands to organize your document. \LaTeX{} handles all the formatting and numbering automatically. Use ref and label commands for cross-references.
-
-\subsection{Comments}
-
-Comments can be added to the margins of the document using the \todo{Here's a comment in the margin!} todo command, as shown in the example on the right. You can also add inline comments too:
-
-\todo[inline, color=green!40]{This is an inline comment.}
-
-\subsection{Tables and Figures}
-
-Use the table and tabular commands for basic tables --- see Table~\ref{tab:widgets}, for example. You can upload a figure (JPEG, PNG or PDF) using the files menu. To include it in your document, use the includegraphics command as in the code for Figure~\ref{fig:frog} below.
-
-% Commands to include a figure:
-\begin{figure}
-\centering
-\includegraphics[width=0.5\textwidth]{frog.jpg}
-\caption{\label{fig:frog}This is a figure caption.}
-\end{figure}
-
-\begin{table}
-\centering
-\begin{tabular}{l|r}
-Item & Quantity \\\hline
-Widgets & 42 \\
-Gadgets & 13
-\end{tabular}
-\caption{\label{tab:widgets}An example table.}
-\end{table}
-
-\subsection{Mathematics}
-
-\LaTeX{} is great at typesetting mathematics. Let $X_1, X_2, \ldots, X_n$ be a sequence of independent and identically distributed random variables with $\text{E}[X_i] = \mu$ and $\text{Var}[X_i] = \sigma^2 < \infty$, and let
-$$S_n = \frac{X_1 + X_2 + \cdots + X_n}{n}
-      = \frac{1}{n}\sum_{i}^{n} X_i$$
-denote their mean. Then as $n$ approaches infinity, the random variables $\sqrt{n}(S_n - \mu)$ converge in distribution to a normal $\mathcal{N}(0, \sigma^2)$.
-
-\subsection{Lists}
-
-You can make lists with automatic numbering \dots
-
-\begin{enumerate}
-\item Like this,
-\item and like this.
-\end{enumerate}
-\dots or bullet points \dots
-\begin{itemize}
-\item Like this,
-\item and like this.
-\end{itemize}
-
-We hope you find write\LaTeX\ useful, and please let us know if you have any feedback using the help menu above.
+\subsection{Possible Use Cases}
+The project can be modified to recognize mostly any type of sound. For example, the first attempt was to recognize the keys pressed on a nearby keyboard; anyway, this attempt failed because of the low SNR and the subsequent difficulty to even detect the key press peaks and their frequencies.
 
 \end{document}
