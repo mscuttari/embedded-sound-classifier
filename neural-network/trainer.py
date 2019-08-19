@@ -12,7 +12,7 @@ class Label(Enum) :
 np.random.seed(7)
 
 # load dataset
-dataset = np.loadtxt("clap_whistle_silence_data.csv", delimiter=';')
+dataset = np.loadtxt("training_data.csv", delimiter=';')
 
 # shuffle dataset for independent results
 np.random.shuffle(dataset)
@@ -40,7 +40,7 @@ scores = model.evaluate(x_samples, y_samples)   # optimistic metrics
 print("\n%s: %.2f%%" % (model.metrics_names[1], scores[1]*100))
 
 # evaluate the network with test samples unused for training
-testset = np.loadtxt("test_cws.csv", delimiter=';')
+testset = np.loadtxt("test_data.csv", delimiter=';')
 x_test = dataset[:, 0:512]
 y_test = to_categorical(dataset[:,512], num_classes=3)
 scores = model.evaluate(x_test, y_test)     # real metrics
