@@ -46,7 +46,7 @@ int main(int argc, char **argv) {
 	while ((n = fread(&buffer[0], sizeof(float), BIN_AMOUNT, input)) > 0) {
 		int i;
 		for (i = 0; i < n; i++) {
-			fprintf(output, "%.6f\t", buffer[i]);
+			fprintf(output, "%.6f;", buffer[i]);
 		}
 		
 		fprintf(output, "\n");

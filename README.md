@@ -31,7 +31,7 @@ This application uses the on-board MEMS microphone to collect audio samples, ana
   2. Connect the cables as in previous case
   3. Launch the FFT reciever with `python FFT_receive.py serial_port_name`
   4. Press the user button, do the desired sounds and press again the button to stop recording
-  5. The results will be in the file `fft.csv`. Values are separated by TAB and not by comma (as it would be in normal CSVs) for better cross-platform management. They must be separated into columns and manually classified according to what they are: one column has to be added at the end and it must contain value 0 for silence, 1 for whistles or 2 for claps
+  5. The results will be in the file `fft.csv`. They must be manually classified according to what they are: one last column has to be added and it must contain value 0 for silence, 1 for whistle or 2 for clap
   6. Go into the `neural-network` folder, place the new data in `training_data.csv` and run `python trainer.py`. The pre-trained model will output to file `model.h5`
 - For pre-trained Keras model to C library conversion: everything is explained in the `docs/x-cube-ai.pdf` file, provided by ST.
-- For embedded software compilation: use command `make` in the root folder or compile using your preferred CMake compatible IDE
+- For embedded software compilation: use command `make` in the `miosix-kernel` folder or compile using your preferred CMake compatible IDE
