@@ -4,6 +4,7 @@
 This application uses the on-board MEMS microphone to collect audio samples, analyze them using a pre-trained neural network and send their classification on the serial port. A desktop python script takes care of reading the results.
 
 ## Requirements
+- STM32F4 Discovery board (project has been developed using STM32F407VGT6)
 - For sound clasification (normal usage):
   - Python 3. You can check your version with `python --V`
   - pyserial: `pip install pyserial`
